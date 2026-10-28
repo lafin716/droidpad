@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back">뒤로</string>
+
+    <string name="mode_touchpad">터치패드</string>
+    <string name="mode_keyboard">키보드</string>
+
+    <string name="touchpad_hint">한 손가락 이동 · 탭하여 클릭\n두 손가락: 탭 = 우클릭, 이동 = 스크롤\n길게 누른 후 이동하면 드래그</string>
+    <string name="touchpad_disabled_hint">연결되지 않았습니다. 위의 블루투스 칩을 눌러 태블릿을 페어링하고 연결하세요.</string>
+    <string name="touchpad_dragging">드래그 중…</string>
+    <string name="mouse_left">왼쪽</string>
+    <string name="mouse_right">오른쪽</string>
+
+    <string name="keyboard_tap_to_type">여기를 눌러 키보드로 입력하세요</string>
+    <string name="keyboard_connect_first">입력하려면 먼저 기기를 연결하세요</string>
+    <string name="keyboard_caps_on">Caps Lock 켜짐</string>
+    <string name="keyboard_unsupported">보낼 수 없는 문자 건너뜀: %d</string>
+    <string name="keyboard_clear">지우기</string>
+    <string name="keyboard_hide">키보드 숨기기</string>
+
+    <string name="key_meta">Win</string>
+    <string name="key_backspace">백스페이스</string>
+    <string name="key_enter">엔터</string>
+    <string name="key_up">위</string>
+    <string name="key_down">아래</string>
+    <string name="key_left">왼쪽</string>
+    <string name="key_right">오른쪽</string>
+
+    <string name="shortcut_copy">복사</string>
+    <string name="shortcut_paste">붙여넣기</string>
+    <string name="shortcut_cut">잘라내기</string>
+    <string name="shortcut_undo">실행 취소</string>
+    <string name="shortcut_select_all">전체 선택</string>
+    <string name="shortcut_home">홈</string>
+    <string name="shortcut_back">뒤로</string>
+
+    <string name="lang_sync">입력 언어 맞추기</string>
+    <string name="lang_sync_title">현재 태블릿 입력 언어</string>
+    <string name="lang_sync_english">영어</string>
+    <string name="lang_sync_korean">한국어(한글)</string>
+
+    <string name="status_initializing">시작 중…</string>
+    <string name="status_no_bluetooth">블루투스 없음</string>
+    <string name="status_no_bluetooth_detail">이 기기에는 블루투스 어댑터가 없습니다.</string>
+    <string name="status_permission">권한 필요</string>
+    <string name="status_permission_detail">블루투스 키보드·마우스로 동작하려면 ‘근처 기기’ 권한이 필요합니다.</string>
+    <string name="status_bt_off">블루투스 꺼짐</string>
+    <string name="status_bt_off_detail">태블릿에 연결하려면 블루투스를 켜세요.</string>
+    <string name="status_unsupported">HID 미지원</string>
+    <string name="status_unsupported_detail">이 휴대폰은 블루투스 HID Device 프로필을 제공하지 않아 키보드·마우스로 동작할 수 없습니다.</string>
+    <string name="status_registering">등록 중…</string>
+    <string name="status_ready">준비됨</string>
+    <string name="status_ready_short">연결 안 됨</string>
+    <string name="status_ready_detail">태블릿의 블루투스 설정에서 “%s”을(를) 페어링하거나 아래에서 연결하세요.</string>
+    <string name="status_connecting">연결 중…</string>
+    <string name="status_connected">연결됨</string>
+    <string name="status_connected_to">%s에 연결됨</string>
+    <string name="status_disconnecting">연결 해제 중…</string>
+    <string name="status_reconnecting">재연결 중(%d번째 시도)…</string>
+    <string name="status_error">오류</string>
+
+    <string name="action_grant">권한 허용</string>
+    <string name="action_enable_bt">블루투스 켜기</string>
+    <string name="action_retry">다시 시도</string>
+    <string name="action_connect">연결</string>
+    <string name="action_disconnect">연결 해제</string>
+    <string name="action_cancel_reconnect">재연결 중지</string>
+    <string name="action_scan">검색</string>
+    <string name="action_stop">중지</string>
+    <string name="action_pair">페어링</string>
+    <string name="action_discoverable">2분간 검색 허용</string>
+
+    <string name="devices_title">기기</string>
+    <string name="devices_bonded">페어링된 기기</string>
+    <string name="devices_bonded_empty">아직 페어링된 기기가 없습니다.</string>
+    <string name="devices_nearby">주변 기기</string>
+    <string name="devices_nearby_empty">검색을 눌러 태블릿을 찾으세요.</string>
+    <string name="devices_scanning">검색 중…</string>
+    <string name="devices_last_host">최근 사용</string>
+    <string name="devices_forget">%s 자동 재연결 해제</string>
+
+    <string name="guide_title">페어링 방법</string>
+    <string name="guide_steps">1. 아래 ‘검색 허용’을 누르세요.\n2. 태블릿에서 설정 › 연결 › 블루투스를 열고 이 휴대폰을 선택하세요.\n3. 두 기기에서 페어링 요청을 수락하세요.\n태블릿은 키보드와 마우스로 인식하며 별도 앱이 필요 없습니다.</string>
+
+    <string name="diag_title">진단</string>
+    <string name="diag_hid_yes">블루투스 HID Device 프로필: 사용 가능</string>
+    <string name="diag_hid_no">블루투스 HID Device 프로필: 사용 불가</string>
+    <string name="diag_hid_unknown">블루투스 HID Device 프로필: 아직 확인 안 됨</string>
+    <string name="diag_leds">호스트 키보드 LED: 0x%02X</string>
+
+    <string name="settings_title">설정</string>
+    <string name="settings_touchpad">터치패드</string>
+    <string name="settings_pointer_speed">포인터 속도</string>
+    <string name="settings_scroll_speed">스크롤 속도</string>
+    <string name="settings_acceleration">포인터 가속</string>
+    <string name="settings_acceleration_desc">빠르게 밀면 포인터가 더 멀리 이동</string>
+    <string name="settings_natural_scroll">자연스러운 스크롤</string>
+    <string name="settings_natural_scroll_desc">콘텐츠가 손가락을 따라 움직임</string>
+    <string name="settings_tap_to_click">탭하여 클릭</string>
+    <string name="settings_haptics">햅틱 피드백</string>
+    <string name="settings_keyboard">키보드</string>
+    <string name="settings_auto_lang">한/영 자동 전환</string>
+    <string name="settings_auto_lang_desc">영문과 한글을 바꿔 입력할 때 전환 키를 자동으로 보냅니다</string>
+    <string name="settings_toggle_key">태블릿 한/영 전환 키</string>
+    <string name="settings_toggle_key_desc">태블릿의 물리 키보드 설정과 같아야 합니다 (삼성 기본값: Shift+Space)</string>
+    <string name="settings_connection">연결</string>
+    <string name="settings_auto_reconnect">자동 재연결</string>
+    <string name="settings_auto_reconnect_desc">연결이 끊기면 마지막 태블릿에 다시 연결</string>
+    <string name="settings_keep_screen_on">연결 중 화면 켜짐 유지</string>
+    <string name="settings_appearance">화면</string>
+    <string name="theme_system">시스템</string>
+    <string name="theme_light">라이트</string>
+    <string name="theme_dark">다크</string>
+    <string name="settings_dynamic_color">다이내믹 컬러</string>
+
+    <string name="toggle_hangul">한/영 키</string>
+    <string name="toggle_right_alt">오른쪽 Alt</string>
+</resources>

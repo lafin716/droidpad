@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Device body -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M34,30h40a6,6 0,0 1,6 6v36a6,6 0,0 1,-6 6h-40a6,6 0,0 1,-6 -6v-36a6,6 0,0 1,6 -6z" />
+    <!-- Touchpad area -->
+    <path
+        android:fillColor="#FF5ED3C4"
+        android:pathData="M36,36h36a3,3 0,0 1,3 3v17a3,3 0,0 1,-3 3h-36a3,3 0,0 1,-3 -3v-17a3,3 0,0 1,3 -3z" />
+    <!-- Pointer -->
+    <path
+        android:fillColor="#FF3D4BB8"
+        android:pathData="M50,40l0,13l3.2,-3.1l2.3,5.1l2.2,-1l-2.3,-5h4.6z" />
+    <!-- Key row -->
+    <path
+        android:fillColor="#FF3D4BB8"
+        android:pathData="M35,63h6v5h-6zM43,63h6v5h-6zM51,63h6v5h-6zM59,63h6v5h-6zM67,63h6v5h-6zM39,70h30v4h-30z" />
+</vector>

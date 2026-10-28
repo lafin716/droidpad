@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">DroidPad</string>
+    <string name="back">Back</string>
+
+    <string name="mode_touchpad">Touchpad</string>
+    <string name="mode_keyboard">Keyboard</string>
+
+    <string name="touchpad_hint">Move with one finger · tap to click\nTwo fingers: tap = right click, drag = scroll\nLong-press then move to drag</string>
+    <string name="touchpad_disabled_hint">Not connected. Tap the Bluetooth chip above to pair and connect your tablet.</string>
+    <string name="touchpad_dragging">Dragging…</string>
+    <string name="mouse_left">Left</string>
+    <string name="mouse_right">Right</string>
+
+    <string name="keyboard_tap_to_type">Tap here to type with your keyboard</string>
+    <string name="keyboard_connect_first">Connect a device to start typing</string>
+    <string name="keyboard_caps_on">Caps Lock on</string>
+    <string name="keyboard_unsupported">Skipped unsupported characters: %d</string>
+    <string name="keyboard_clear">Clear</string>
+    <string name="keyboard_hide">Hide keyboard</string>
+
+    <string name="key_ctrl" translatable="false">Ctrl</string>
+    <string name="key_shift" translatable="false">Shift</string>
+    <string name="key_alt" translatable="false">Alt</string>
+    <string name="key_meta">Win</string>
+    <string name="key_backspace">Backspace</string>
+    <string name="key_enter">Enter</string>
+    <string name="key_up">Up</string>
+    <string name="key_down">Down</string>
+    <string name="key_left">Left</string>
+    <string name="key_right">Right</string>
+
+    <string name="shortcut_copy">Copy</string>
+    <string name="shortcut_paste">Paste</string>
+    <string name="shortcut_cut">Cut</string>
+    <string name="shortcut_undo">Undo</string>
+    <string name="shortcut_select_all">Select all</string>
+    <string name="shortcut_switch_app" translatable="false">Alt+Tab</string>
+    <string name="shortcut_home">Home</string>
+    <string name="shortcut_back">Back</string>
+
+    <string name="lang_english_short" translatable="false">EN</string>
+    <string name="lang_korean_short" translatable="false">한</string>
+    <string name="lang_sync">Sync input language</string>
+    <string name="lang_sync_title">The tablet is currently typing…</string>
+    <string name="lang_sync_english">English</string>
+    <string name="lang_sync_korean">Korean (Hangul)</string>
+
+    <string name="status_initializing">Starting…</string>
+    <string name="status_no_bluetooth">No Bluetooth</string>
+    <string name="status_no_bluetooth_detail">This device has no Bluetooth adapter.</string>
+    <string name="status_permission">Permission needed</string>
+    <string name="status_permission_detail">DroidPad needs the “Nearby devices” permission to act as a Bluetooth keyboard and mouse.</string>
+    <string name="status_bt_off">Bluetooth is off</string>
+    <string name="status_bt_off_detail">Turn on Bluetooth to connect to your tablet.</string>
+    <string name="status_unsupported">HID not supported</string>
+    <string name="status_unsupported_detail">This phone does not expose the Bluetooth HID Device profile, so it cannot act as a keyboard or mouse.</string>
+    <string name="status_registering">Registering…</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_ready_short">Not connected</string>
+    <string name="status_ready_detail">Pair your tablet with “%s” in its Bluetooth settings, or connect below.</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_connected_to">Connected to %s</string>
+    <string name="status_disconnecting">Disconnecting…</string>
+    <string name="status_reconnecting">Reconnecting (attempt %d)…</string>
+    <string name="status_error">Error</string>
+
+    <string name="action_grant">Grant permission</string>
+    <string name="action_enable_bt">Turn on Bluetooth</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_connect">Connect</string>
+    <string name="action_disconnect">Disconnect</string>
+    <string name="action_cancel_reconnect">Stop reconnecting</string>
+    <string name="action_scan">Scan</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_pair">Pair</string>
+    <string name="action_discoverable">Make visible for 2 min</string>
+
+    <string name="devices_title">Devices</string>
+    <string name="devices_bonded">Paired devices</string>
+    <string name="devices_bonded_empty">No paired devices yet.</string>
+    <string name="devices_nearby">Nearby devices</string>
+    <string name="devices_nearby_empty">Tap Scan to look for your tablet.</string>
+    <string name="devices_scanning">Scanning…</string>
+    <string name="devices_last_host">Last used</string>
+    <string name="devices_forget">Forget auto-reconnect to %s</string>
+
+    <string name="guide_title">How to pair</string>
+    <string name="guide_steps">1. Tap “Make visible” below.\n2. On the tablet open Settings › Connections › Bluetooth and select this phone.\n3. Accept the pairing request on both devices.\nThe tablet then sees a keyboard and mouse — no app is needed on it.</string>
+
+    <string name="diag_title">Diagnostics</string>
+    <string name="diag_hid_yes">Bluetooth HID Device profile: available</string>
+    <string name="diag_hid_no">Bluetooth HID Device profile: not available</string>
+    <string name="diag_hid_unknown">Bluetooth HID Device profile: not checked yet</string>
+    <string name="diag_leds">Host keyboard LEDs: 0x%02X</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_touchpad">Touchpad</string>
+    <string name="settings_pointer_speed">Pointer speed</string>
+    <string name="settings_scroll_speed">Scroll speed</string>
+    <string name="settings_acceleration">Pointer acceleration</string>
+    <string name="settings_acceleration_desc">Fast swipes move the pointer further</string>
+    <string name="settings_natural_scroll">Natural scrolling</string>
+    <string name="settings_natural_scroll_desc">Content follows your fingers</string>
+    <string name="settings_tap_to_click">Tap to click</string>
+    <string name="settings_haptics">Haptic feedback</string>
+    <string name="settings_keyboard">Keyboard</string>
+    <string name="settings_auto_lang">Automatic 한/영 switching</string>
+    <string name="settings_auto_lang_desc">Sends the toggle key when you switch between English and Hangul</string>
+    <string name="settings_toggle_key">Tablet language toggle key</string>
+    <string name="settings_toggle_key_desc">Must match the tablet’s physical keyboard setting (Samsung default: Shift+Space)</string>
+    <string name="settings_connection">Connection</string>
+    <string name="settings_auto_reconnect">Auto reconnect</string>
+    <string name="settings_auto_reconnect_desc">Reconnect to the last tablet when the link drops</string>
+    <string name="settings_keep_screen_on">Keep screen on while connected</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic color</string>
+    <string name="settings_version" translatable="false">DroidPad %s</string>
+
+    <string name="toggle_shift_space" translatable="false">Shift+Space</string>
+    <string name="toggle_hangul">한/영 key</string>
+    <string name="toggle_right_alt">Right Alt</string>
+    <string name="toggle_ctrl_space" translatable="false">Ctrl+Space</string>
+</resources>

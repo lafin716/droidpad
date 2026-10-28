@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.DROIDPAD_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::DROIDPAD_KEYSTORE_BASE64 secret is missing"; exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "DROIDPAD_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Test and build signed APK
+        env:
+          DROIDPAD_KEYSTORE_PASSWORD: ${{ secrets.DROIDPAD_KEYSTORE_PASSWORD }}
+          DROIDPAD_KEY_ALIAS: ${{ secrets.DROIDPAD_KEY_ALIAS }}
+          DROIDPAD_KEY_PASSWORD: ${{ secrets.DROIDPAD_KEY_PASSWORD }}
+          DROIDPAD_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          export DROIDPAD_VERSION_NAME="${GITHUB_REF_NAME#v}"
+          ./gradlew --no-daemon testDebugUnitTest assembleRelease
+
+      - name: Verify signature and collect APK
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          APK=app/build/outputs/apk/release/app-release.apk
+          "$APKSIGNER" verify --print-certs "$APK"
+          mkdir -p dist
+          cp "$APK" "dist/DroidPad-${GITHUB_REF_NAME}.apk"
+          (cd dist && sha256sum *.apk > SHA256SUMS.txt)
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --title "DroidPad $GITHUB_REF_NAME" --generate-notes
+          fi

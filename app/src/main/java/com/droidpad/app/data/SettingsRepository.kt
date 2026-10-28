@@ -1,0 +1,108 @@
+package com.droidpad.app.data
+
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.content.edit
+import com.droidpad.app.input.keyboard.LanguageToggleKey
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+data class AppSettings(
+    val pointerSpeed: Float = 1.2f,
+    val acceleration: Boolean = true,
+    val scrollSpeed: Float = 1.0f,
+    val naturalScroll: Boolean = true,
+    val tapToClick: Boolean = true,
+    val haptics: Boolean = true,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val dynamicColor: Boolean = true,
+    val autoLanguageSwitch: Boolean = true,
+    val languageToggleKey: LanguageToggleKey = LanguageToggleKey.SHIFT_SPACE,
+    val autoReconnect: Boolean = true,
+    val keepScreenOn: Boolean = true,
+    val lastHostAddress: String? = null,
+    val lastHostName: String? = null,
+) {
+    companion object {
+        const val MIN_POINTER_SPEED = 0.3f
+        const val MAX_POINTER_SPEED = 3.0f
+        const val MIN_SCROLL_SPEED = 0.3f
+        const val MAX_SCROLL_SPEED = 3.0f
+    }
+}
+
+/** SharedPreferences-backed settings exposed as a [StateFlow]. */
+class SettingsRepository(context: Context) {
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("droidpad_settings", Context.MODE_PRIVATE)
+
+    private val _settings = MutableStateFlow(load())
+    val settings: StateFlow<AppSettings> = _settings.asStateFlow()
+
+    fun update(transform: (AppSettings) -> AppSettings) {
+        val next = transform(_settings.value)
+        if (next == _settings.value) return
+        _settings.value = next
+        save(next)
+    }
+
+    private fun load(): AppSettings {
+        val d = AppSettings()
+        return AppSettings(
+            pointerSpeed = prefs.getFloat(K_POINTER, d.pointerSpeed),
+            acceleration = prefs.getBoolean(K_ACCEL, d.acceleration),
+            scrollSpeed = prefs.getFloat(K_SCROLL, d.scrollSpeed),
+            naturalScroll = prefs.getBoolean(K_NATURAL, d.naturalScroll),
+            tapToClick = prefs.getBoolean(K_TAP, d.tapToClick),
+            haptics = prefs.getBoolean(K_HAPTICS, d.haptics),
+            themeMode = enumOr(prefs.getString(K_THEME, null), d.themeMode),
+            dynamicColor = prefs.getBoolean(K_DYNAMIC, d.dynamicColor),
+            autoLanguageSwitch = prefs.getBoolean(K_AUTO_LANG, d.autoLanguageSwitch),
+            languageToggleKey = enumOr(prefs.getString(K_TOGGLE, null), d.languageToggleKey),
+            autoReconnect = prefs.getBoolean(K_RECONNECT, d.autoReconnect),
+            keepScreenOn = prefs.getBoolean(K_SCREEN, d.keepScreenOn),
+            lastHostAddress = prefs.getString(K_HOST_ADDR, null),
+            lastHostName = prefs.getString(K_HOST_NAME, null),
+        )
+    }
+
+    private fun save(s: AppSettings) = prefs.edit {
+        putFloat(K_POINTER, s.pointerSpeed)
+        putBoolean(K_ACCEL, s.acceleration)
+        putFloat(K_SCROLL, s.scrollSpeed)
+        putBoolean(K_NATURAL, s.naturalScroll)
+        putBoolean(K_TAP, s.tapToClick)
+        putBoolean(K_HAPTICS, s.haptics)
+        putString(K_THEME, s.themeMode.name)
+        putBoolean(K_DYNAMIC, s.dynamicColor)
+        putBoolean(K_AUTO_LANG, s.autoLanguageSwitch)
+        putString(K_TOGGLE, s.languageToggleKey.name)
+        putBoolean(K_RECONNECT, s.autoReconnect)
+        putBoolean(K_SCREEN, s.keepScreenOn)
+        putString(K_HOST_ADDR, s.lastHostAddress)
+        putString(K_HOST_NAME, s.lastHostName)
+    }
+
+    private inline fun <reified E : Enum<E>> enumOr(name: String?, default: E): E =
+        name?.let { n -> enumValues<E>().firstOrNull { it.name == n } } ?: default
+
+    private companion object {
+        const val K_POINTER = "pointer_speed"
+        const val K_ACCEL = "acceleration"
+        const val K_SCROLL = "scroll_speed"
+        const val K_NATURAL = "natural_scroll"
+        const val K_TAP = "tap_to_click"
+        const val K_HAPTICS = "haptics"
+        const val K_THEME = "theme_mode"
+        const val K_DYNAMIC = "dynamic_color"
+        const val K_AUTO_LANG = "auto_language_switch"
+        const val K_TOGGLE = "language_toggle_key"
+        const val K_RECONNECT = "auto_reconnect"
+        const val K_SCREEN = "keep_screen_on"
+        const val K_HOST_ADDR = "last_host_address"
+        const val K_HOST_NAME = "last_host_name"
+    }
+}
