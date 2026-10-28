@@ -16,5 +16,5 @@ is tracked separately (T13) and is **not** verified.
 | T9 | Independent review + fixes | DONE | Review 1: 1 HIGH + 4 MEDIUM + 3 LOW fixed (drag modifier, permission split, shutdown race, concurrent holds, auto-connect scope, NOT_EXPORTED receiver, surrogate count). Re-review: duplicate-proxy race and surrogate prefix bug fixed; host-language reset on reconnect reverted (host keeps its IME state) |
 | T10 | Emulator smoke test | DONE | Signed release APK installs and launches on emulator-5554, no crash in logcat |
 | T11 | Docs, CI, signing | DONE | README, LICENSE (MIT), `.github/workflows/{ci,release}.yml`, keystore via env/Secrets only |
-| T12 | GitHub repo + Release v1.0.0 | TODO | |
+| T12 | GitHub repo + Release v1.0.0 | DONE | CI run 40689624744 and release run 40690349797 succeeded; downloaded `DroidPad-v1.0.0.apk` passes `SHA256SUMS.txt` and `apksigner verify` (cert SHA-256 1316dd08…d532), installs and launches on emulator-5554 |
 | T13 | Real-device Bluetooth HID verification (Fold → Galaxy Tab) | BLOCKED | No physical devices available to the agent; emulator has no Bluetooth HID Device profile |
