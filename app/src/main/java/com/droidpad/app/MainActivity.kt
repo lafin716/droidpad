@@ -29,6 +29,7 @@ import com.droidpad.app.hid.HidConnectionManager
 import com.droidpad.app.hid.HidStatus
 import com.droidpad.app.ui.screens.ControlScreen
 import com.droidpad.app.ui.screens.DevicesScreen
+import com.droidpad.app.ui.screens.LayoutEditorScreen
 import com.droidpad.app.ui.screens.SettingsScreen
 import com.droidpad.app.ui.theme.DroidPadTheme
 
@@ -47,8 +48,12 @@ class MainActivity : ComponentActivity() {
     private val enableBluetoothLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { vm.refresh() }
 
+    // The result code is the granted duration in seconds, or RESULT_CANCELED (0) when declined.
     private val discoverableLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { vm.refresh() }
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            container.connection.onDiscoverable(result.resultCode)
+            vm.refresh()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -99,12 +104,12 @@ class MainActivity : ComponentActivity() {
 
     private fun requestDiscoverable() {
         val intent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-            .putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 120)
+            .putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, HidConnectionManager.DEFAULT_DISCOVERABLE_SECONDS)
         runCatching { discoverableLauncher.launch(intent) }
     }
 }
 
-private enum class Screen { CONTROL, DEVICES, SETTINGS }
+private enum class Screen { CONTROL, DEVICES, SETTINGS, LAYOUT_EDITOR }
 
 @Composable
 private fun DroidPadRoot(
@@ -115,7 +120,9 @@ private fun DroidPadRoot(
 ) {
     var screen by rememberSaveable { mutableIntStateOf(Screen.CONTROL.ordinal) }
     val current = Screen.entries[screen]
-    BackHandler(enabled = current != Screen.CONTROL) { screen = Screen.CONTROL.ordinal }
+    BackHandler(enabled = current != Screen.CONTROL) {
+        screen = if (current == Screen.LAYOUT_EDITOR) Screen.SETTINGS.ordinal else Screen.CONTROL.ordinal
+    }
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
         when (current) {
@@ -132,7 +139,12 @@ private fun DroidPadRoot(
                 onEnableBluetooth = onEnableBluetooth,
                 onMakeDiscoverable = onMakeDiscoverable,
             )
-            Screen.SETTINGS -> SettingsScreen(vm = vm, onBack = { screen = Screen.CONTROL.ordinal })
+            Screen.SETTINGS -> SettingsScreen(
+                vm = vm,
+                onBack = { screen = Screen.CONTROL.ordinal },
+                onEditLayout = { screen = Screen.LAYOUT_EDITOR.ordinal },
+            )
+            Screen.LAYOUT_EDITOR -> LayoutEditorScreen(vm = vm, wide = wide, onBack = { screen = Screen.SETTINGS.ordinal })
         }
     }
 }

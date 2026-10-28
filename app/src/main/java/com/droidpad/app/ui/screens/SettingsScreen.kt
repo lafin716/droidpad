@@ -6,14 +6,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -39,13 +43,15 @@ import com.droidpad.app.BuildConfig
 import com.droidpad.app.MainViewModel
 import com.droidpad.app.R
 import com.droidpad.app.data.AppSettings
+import com.droidpad.app.data.KeyboardInputMode
+import com.droidpad.app.data.LayoutMode
 import com.droidpad.app.data.ThemeMode
 import com.droidpad.app.input.keyboard.LanguageToggleKey
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
+fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Unit) {
     val s by vm.settings.collectAsStateWithLifecycle()
     val update = vm::updateSettings
     Scaffold(
@@ -81,7 +87,36 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
                 SwitchRow(stringResource(R.string.settings_tap_to_click), null, s.tapToClick) { v -> update { it.copy(tapToClick = v) } }
                 SwitchRow(stringResource(R.string.settings_haptics), null, s.haptics) { v -> update { it.copy(haptics = v) } }
             }
+            Section(stringResource(R.string.settings_layout)) {
+                Text(stringResource(R.string.settings_layout_mode), style = MaterialTheme.typography.bodyLarge)
+                Segmented(
+                    LayoutMode.entries, s.layoutMode,
+                    label = { if (it == LayoutMode.PRESET) R.string.layout_preset else R.string.layout_custom },
+                ) { v -> update { it.copy(layoutMode = v) } }
+                SwitchRow(stringResource(R.string.settings_swap_panes), stringResource(R.string.settings_swap_panes_desc), s.swapPanes) { v ->
+                    update { it.copy(swapPanes = v) }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                        Text(stringResource(R.string.settings_edit_layout), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            stringResource(R.string.settings_edit_layout_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    FilledTonalButton(onClick = onEditLayout) {
+                        Icon(Icons.Outlined.Edit, null, Modifier.size(18.dp))
+                        Text(stringResource(R.string.editor_title), Modifier.padding(start = 8.dp))
+                    }
+                }
+            }
             Section(stringResource(R.string.settings_keyboard)) {
+                Text(stringResource(R.string.settings_input_mode), style = MaterialTheme.typography.bodyLarge)
+                Segmented(
+                    KeyboardInputMode.entries, s.keyboardInputMode,
+                    label = { if (it == KeyboardInputMode.SYSTEM_IME) R.string.input_mode_system else R.string.input_mode_virtual },
+                ) { v -> update { it.copy(keyboardInputMode = v) } }
                 SwitchRow(
                     stringResource(R.string.settings_auto_lang), stringResource(R.string.settings_auto_lang_desc), s.autoLanguageSwitch,
                 ) { v -> update { it.copy(autoLanguageSwitch = v) } }
@@ -148,6 +183,21 @@ private fun toggleKeyLabel(key: LanguageToggleKey): String = stringResource(
         LanguageToggleKey.CTRL_SPACE -> R.string.toggle_ctrl_space
     },
 )
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun <T> Segmented(options: List<T>, selected: T, label: (T) -> Int, onSelect: (T) -> Unit) {
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+        options.forEachIndexed { i, option ->
+            SegmentedButton(
+                selected = selected == option,
+                onClick = { onSelect(option) },
+                shape = SegmentedButtonDefaults.itemShape(i, options.size),
+                label = { Text(stringResource(label(option)), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+            )
+        }
+    }
+}
 
 @Composable
 private fun Section(title: String, content: @Composable () -> Unit) {

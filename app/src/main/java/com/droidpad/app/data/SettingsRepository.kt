@@ -10,6 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
+/** PRESET uses the built-in touchpad + keys screen; CUSTOM uses the user's grid layout. */
+enum class LayoutMode { PRESET, CUSTOM }
+
+/** How text is typed: the phone's own IME, or DroidPad's full-screen virtual keyboard. */
+enum class KeyboardInputMode { SYSTEM_IME, VIRTUAL_FULLSCREEN }
+
 data class AppSettings(
     val pointerSpeed: Float = 1.2f,
     val acceleration: Boolean = true,
@@ -25,6 +31,12 @@ data class AppSettings(
     val keepScreenOn: Boolean = true,
     val lastHostAddress: String? = null,
     val lastHostName: String? = null,
+    /** Puts the keys on the left and the touchpad on the right in wide layouts. */
+    val swapPanes: Boolean = false,
+    val layoutMode: LayoutMode = LayoutMode.PRESET,
+    val keyboardInputMode: KeyboardInputMode = KeyboardInputMode.SYSTEM_IME,
+    /** Custom layouts keyed by [CustomLayout.gridKey], so each screen size keeps its own. */
+    val customLayouts: Map<String, CustomLayout> = emptyMap(),
 ) {
     companion object {
         const val MIN_POINTER_SPEED = 0.3f
@@ -66,6 +78,10 @@ class SettingsRepository(context: Context) {
             keepScreenOn = prefs.getBoolean(K_SCREEN, d.keepScreenOn),
             lastHostAddress = prefs.getString(K_HOST_ADDR, null),
             lastHostName = prefs.getString(K_HOST_NAME, null),
+            swapPanes = prefs.getBoolean(K_SWAP, d.swapPanes),
+            layoutMode = enumOr(prefs.getString(K_LAYOUT_MODE, null), d.layoutMode),
+            keyboardInputMode = enumOr(prefs.getString(K_INPUT_MODE, null), d.keyboardInputMode),
+            customLayouts = CustomLayout.decodeAll(prefs.getString(K_LAYOUTS, null)),
         )
     }
 
@@ -84,6 +100,10 @@ class SettingsRepository(context: Context) {
         putBoolean(K_SCREEN, s.keepScreenOn)
         putString(K_HOST_ADDR, s.lastHostAddress)
         putString(K_HOST_NAME, s.lastHostName)
+        putBoolean(K_SWAP, s.swapPanes)
+        putString(K_LAYOUT_MODE, s.layoutMode.name)
+        putString(K_INPUT_MODE, s.keyboardInputMode.name)
+        putString(K_LAYOUTS, CustomLayout.encodeAll(s.customLayouts))
     }
 
     private inline fun <reified E : Enum<E>> enumOr(name: String?, default: E): E =
@@ -104,5 +124,9 @@ class SettingsRepository(context: Context) {
         const val K_SCREEN = "keep_screen_on"
         const val K_HOST_ADDR = "last_host_address"
         const val K_HOST_NAME = "last_host_name"
+        const val K_SWAP = "swap_panes"
+        const val K_LAYOUT_MODE = "layout_mode"
+        const val K_INPUT_MODE = "keyboard_input_mode"
+        const val K_LAYOUTS = "custom_layouts"
     }
 }

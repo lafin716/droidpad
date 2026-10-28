@@ -16,6 +16,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +50,8 @@ data class HidState(
     val reconnectAttempt: Int = 0,
     val leds: Int = 0,
     val error: String? = null,
+    /** [android.os.SystemClock.elapsedRealtime] at which "visible to other devices" ends; null when not visible. */
+    val discoverableUntil: Long? = null,
 )
 
 /**
@@ -435,11 +438,35 @@ class HidConnectionManager(
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> _state.update { it.copy(discovering = true) }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> _state.update { it.copy(discovering = false) }
+                BluetoothAdapter.ACTION_SCAN_MODE_CHANGED -> {
+                    val mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.SCAN_MODE_NONE)
+                    if (mode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+                        if (_state.value.discoverableUntil == null) onDiscoverable(DEFAULT_DISCOVERABLE_SECONDS)
+                    } else {
+                        clearDiscoverable()
+                    }
+                }
             }
         }
     }
 
+    /** Called when the user accepted the "make visible" request for [seconds]. */
+    fun onDiscoverable(seconds: Int) {
+        if (seconds <= 0) return
+        main.removeCallbacks(discoverableTimeout)
+        _state.update { it.copy(discoverableUntil = SystemClock.elapsedRealtime() + seconds * 1000L) }
+        main.postDelayed(discoverableTimeout, seconds * 1000L)
+    }
+
+    private fun clearDiscoverable() {
+        main.removeCallbacks(discoverableTimeout)
+        _state.update { it.copy(discoverableUntil = null) }
+    }
+
+    private val discoverableTimeout = Runnable { _state.update { it.copy(discoverableUntil = null) } }
+
     private fun onBluetoothOff() {
+        clearDiscoverable()
         main.removeCallbacks(reconnectRunnable)
         main.removeCallbacks(proxyTimeout)
         hid?.let { adapter?.closeProfileProxy(BluetoothProfile.HID_DEVICE, it) }
@@ -460,6 +487,7 @@ class HidConnectionManager(
             addAction(BluetoothDevice.ACTION_FOUND)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)
         }
         ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
@@ -470,6 +498,7 @@ class HidConnectionManager(
         main.removeCallbacks(reconnectRunnable)
         main.removeCallbacks(proxyTimeout)
         main.removeCallbacks(restartRunnable)
+        main.removeCallbacks(discoverableTimeout)
         if (receiversRegistered) {
             runCatching { context.unregisterReceiver(receiver) }
             receiversRegistered = false
@@ -496,6 +525,7 @@ class HidConnectionManager(
     companion object {
         private const val TAG = "HidConnection"
         private const val PROXY_TIMEOUT_MS = 5_000L
+        const val DEFAULT_DISCOVERABLE_SECONDS = 120
         const val SDP_NAME = "DroidPad"
         const val SDP_DESCRIPTION = "Keyboard and touchpad"
         const val SDP_PROVIDER = "DroidPad"

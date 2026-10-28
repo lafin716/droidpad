@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.droidpad.app.R
+import com.droidpad.app.data.KeyboardInputMode
 import com.droidpad.app.hid.KeyCodes
 import com.droidpad.app.hid.KeyStroke
 import com.droidpad.app.hid.Modifier as Mod
@@ -75,34 +76,70 @@ fun KeyboardPanel(
     unsupportedCount: Int,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
-    onInputViewReady: (HidInputView) -> Unit = {},
+    inputMode: KeyboardInputMode = KeyboardInputMode.SYSTEM_IME,
+    onOpenVirtualKeyboard: () -> Unit = {},
 ) {
-    var inputView by remember { mutableStateOf<HidInputView?>(null) }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        InputPreview(
-            text = mirrored,
+        TextInputBar(
+            controller = controller,
             enabled = enabled,
+            mirrored = mirrored,
             capsLock = capsLock,
             unsupportedCount = unsupportedCount,
-            onTap = { inputView?.showKeyboard() },
-            onClear = controller::clearInput,
-            onHide = { inputView?.hideKeyboard() },
-        ) {
+            inputMode = inputMode,
+            onOpenVirtualKeyboard = onOpenVirtualKeyboard,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+        )
+        ModifierRow(modifiers, hostLanguage, enabled, controller)
+        SpecialKeys(controller, enabled, compact)
+    }
+}
+
+/**
+ * Tap-to-type bar with a preview of the mirrored text. With [KeyboardInputMode.SYSTEM_IME] it
+ * hosts the hidden IME bridge; otherwise tapping opens DroidPad's own virtual keyboard.
+ */
+@Composable
+fun TextInputBar(
+    controller: InputController,
+    enabled: Boolean,
+    mirrored: String,
+    capsLock: Boolean,
+    unsupportedCount: Int,
+    inputMode: KeyboardInputMode,
+    onOpenVirtualKeyboard: () -> Unit,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = false,
+) {
+    var inputView by remember { mutableStateOf<HidInputView?>(null) }
+    val useIme = inputMode == KeyboardInputMode.SYSTEM_IME
+    InputPreview(
+        text = mirrored,
+        enabled = enabled,
+        capsLock = capsLock,
+        unsupportedCount = unsupportedCount,
+        onTap = { if (useIme) inputView?.showKeyboard() else onOpenVirtualKeyboard() },
+        onClear = controller::clearInput,
+        onHide = if (useIme) ({ inputView?.hideKeyboard() }) else null,
+        modifier = modifier,
+        singleLine = singleLine,
+    ) {
+        if (useIme) {
             AndroidView(
                 factory = { ctx ->
                     HidInputView(ctx).also {
                         it.controller = controller
                         inputView = it
-                        onInputViewReady(it)
                     }
                 },
                 update = { it.controller = controller },
-                onRelease = { it.controller = null },
+                onRelease = {
+                    it.controller = null
+                    inputView = null
+                },
                 modifier = Modifier.size(1.dp),
             )
         }
-        ModifierRow(modifiers, hostLanguage, enabled, controller)
-        SpecialKeys(controller, enabled, compact)
     }
 }
 
@@ -114,26 +151,28 @@ private fun InputPreview(
     unsupportedCount: Int,
     onTap: () -> Unit,
     onClear: () -> Unit,
-    onHide: () -> Unit,
+    onHide: (() -> Unit)?,
+    modifier: Modifier,
+    singleLine: Boolean,
     editor: @Composable () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         color = colors.surfaceContainerHigh,
-        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(enabled = enabled, onClick = onTap),
+        modifier = modifier.clickable(enabled = enabled, onClick = onTap),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 16.dp, end = 4.dp)) {
             Icon(Icons.Outlined.Keyboard, null, tint = colors.primary)
             Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f).padding(vertical = 10.dp)) {
+            Column(Modifier.weight(1f).padding(vertical = 4.dp)) {
                 val placeholder = text.isEmpty()
                 Text(
                     if (placeholder) stringResource(if (enabled) R.string.keyboard_tap_to_type else R.string.keyboard_connect_first)
                     else text.takeLast(120).replace('\n', '↵'),
                     style = MaterialTheme.typography.bodyLarge,
                     color = if (placeholder) colors.onSurfaceVariant else colors.onSurface,
-                    maxLines = 2,
+                    maxLines = if (singleLine) 1 else 2,
                     overflow = TextOverflow.StartEllipsis,
                 )
                 val notes = buildList {
@@ -148,7 +187,9 @@ private fun InputPreview(
             if (text.isNotEmpty()) {
                 IconButton(onClick = onClear) { Icon(Icons.Outlined.Clear, stringResource(R.string.keyboard_clear)) }
             }
-            IconButton(onClick = onHide) { Icon(Icons.Outlined.KeyboardArrowDown, stringResource(R.string.keyboard_hide)) }
+            if (onHide != null) {
+                IconButton(onClick = onHide) { Icon(Icons.Outlined.KeyboardArrowDown, stringResource(R.string.keyboard_hide)) }
+            }
         }
     }
 }
@@ -195,7 +236,7 @@ private fun ModifierRow(
 }
 
 @Composable
-private fun LanguageChip(hostLanguage: HostLanguage, enabled: Boolean, controller: InputController) {
+internal fun LanguageChip(hostLanguage: HostLanguage, enabled: Boolean, controller: InputController) {
     var menu by remember { mutableStateOf(false) }
     Box {
         AssistChip(
@@ -234,7 +275,7 @@ private fun LanguageChip(hostLanguage: HostLanguage, enabled: Boolean, controlle
     }
 }
 
-private data class KeySpec(
+internal data class KeySpec(
     val label: String,
     val stroke: KeyStroke,
     val icon: ImageVector? = null,
@@ -314,7 +355,7 @@ private fun ScrollKeyRow(keys: List<KeySpec>, controller: InputController, enabl
 }
 
 @Composable
-private fun Key(spec: KeySpec, controller: InputController, enabled: Boolean, modifier: Modifier) {
+internal fun Key(spec: KeySpec, controller: InputController, enabled: Boolean, modifier: Modifier) {
     if (spec.hold) {
         KeyCap(spec, enabled, modifier, onDown = { controller.keyDown(spec.stroke) }, onUp = { controller.keyUp(spec.stroke) })
     } else {

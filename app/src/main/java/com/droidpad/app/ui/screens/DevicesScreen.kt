@@ -50,6 +50,8 @@ import com.droidpad.app.R
 import com.droidpad.app.hid.HidState
 import com.droidpad.app.hid.HidStatus
 import com.droidpad.app.hid.HostDevice
+import com.droidpad.app.ui.components.DiscoverableIndicator
+import com.droidpad.app.ui.components.rememberDiscoverableRemaining
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +95,7 @@ fun DevicesScreen(
             }
             val usable = hid.status in setOf(HidStatus.READY, HidStatus.CONNECTING, HidStatus.CONNECTED, HidStatus.DISCONNECTING)
             if (usable) {
-                item { PairingGuide(onMakeDiscoverable) }
+                item { PairingGuide(hid.discoverableUntil, onMakeDiscoverable) }
                 item { SectionTitle(stringResource(R.string.devices_bonded)) }
                 if (hid.bondedDevices.isEmpty()) {
                     item { EmptyText(stringResource(R.string.devices_bonded_empty)) }
@@ -228,7 +230,8 @@ private fun StatusCard(
 }
 
 @Composable
-private fun PairingGuide(onMakeDiscoverable: () -> Unit) {
+private fun PairingGuide(discoverableUntil: Long?, onMakeDiscoverable: () -> Unit) {
+    val remaining = rememberDiscoverableRemaining(discoverableUntil)
     Card(
         Modifier.widthIn(max = 720.dp).fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
@@ -236,10 +239,11 @@ private fun PairingGuide(onMakeDiscoverable: () -> Unit) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.guide_title), style = MaterialTheme.typography.titleSmall)
             Text(stringResource(R.string.guide_steps), style = MaterialTheme.typography.bodyMedium)
+            if (remaining != null) DiscoverableIndicator(remaining, Modifier.padding(vertical = 4.dp))
             FilledTonalButton(onClick = onMakeDiscoverable) {
                 Icon(Icons.Outlined.Visibility, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.action_discoverable))
+                Text(stringResource(if (remaining != null) R.string.action_discoverable_extend else R.string.action_discoverable))
             }
         }
     }

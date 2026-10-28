@@ -115,4 +115,39 @@
 
     <string name="toggle_hangul">한/영 키</string>
     <string name="toggle_right_alt">오른쪽 Alt</string>
+
+    <string name="action_discoverable_extend">2분 연장</string>
+    <string name="discoverable_active">검색 허용 중 · %1$s 남음</string>
+    <string name="discoverable_short">검색 허용 %1$s</string>
+
+    <string name="settings_layout">레이아웃</string>
+    <string name="settings_swap_panes">터치패드와 키 위치 바꾸기</string>
+    <string name="settings_swap_panes_desc">키를 왼쪽, 터치패드를 오른쪽에 배치합니다</string>
+    <string name="settings_layout_mode">컨트롤 레이아웃</string>
+    <string name="layout_preset">기본</string>
+    <string name="layout_custom">사용자 지정</string>
+    <string name="settings_edit_layout">사용자 지정 레이아웃 편집</string>
+    <string name="settings_edit_layout_desc">키 크기 격자 위에 위젯을 배치합니다</string>
+    <string name="settings_input_mode">입력 키보드</string>
+    <string name="input_mode_system">시스템 키보드</string>
+    <string name="input_mode_virtual">전체 화면 키보드</string>
+
+    <string name="editor_title">레이아웃 편집</string>
+    <string name="editor_hint">빈 칸을 탭해 추가 · 끌어서 이동 · 모서리를 끌어 크기 조절</string>
+    <string name="editor_add">위젯 추가</string>
+    <string name="editor_reset">기본값으로 재설정</string>
+    <string name="editor_done">완료</string>
+    <string name="editor_delete">삭제</string>
+    <string name="editor_no_space">이 위젯을 놓을 빈 공간이 없습니다</string>
+    <string name="editor_grid_size">격자 %1$d × %2$d</string>
+    <string name="editor_pick_title">위젯 선택</string>
+    <string name="editor_group_pointer">포인터</string>
+    <string name="editor_group_keys">키</string>
+    <string name="editor_group_shortcuts">단축키</string>
+
+    <string name="widget_touchpad">터치패드</string>
+    <string name="widget_input_bar">텍스트 입력</string>
+    <string name="widget_mouse_middle">가운데</string>
+
+    <string name="virtual_keyboard_close">키보드 닫기</string>
 </resources>

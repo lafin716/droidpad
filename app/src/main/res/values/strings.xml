@@ -125,4 +125,40 @@
     <string name="toggle_hangul">한/영 key</string>
     <string name="toggle_right_alt">Right Alt</string>
     <string name="toggle_ctrl_space" translatable="false">Ctrl+Space</string>
+
+    <string name="action_discoverable_extend">Extend 2 min</string>
+    <string name="discoverable_active">Visible to nearby devices · %1$s left</string>
+    <string name="discoverable_short">Visible %1$s</string>
+
+    <string name="settings_layout">Layout</string>
+    <string name="settings_swap_panes">Swap touchpad and keys</string>
+    <string name="settings_swap_panes_desc">Put the keys on the left and the touchpad on the right</string>
+    <string name="settings_layout_mode">Control layout</string>
+    <string name="layout_preset">Default</string>
+    <string name="layout_custom">Custom</string>
+    <string name="settings_edit_layout">Edit custom layout</string>
+    <string name="settings_edit_layout_desc">Arrange widgets on a grid of key-sized cells</string>
+    <string name="settings_input_mode">Typing keyboard</string>
+    <string name="input_mode_system">System keyboard</string>
+    <string name="input_mode_virtual">Full-screen keyboard</string>
+
+    <string name="editor_title">Edit layout</string>
+    <string name="editor_hint">Tap an empty cell to add · drag to move · drag the corner to resize</string>
+    <string name="editor_add">Add widget</string>
+    <string name="editor_reset">Reset to default</string>
+    <string name="editor_done">Done</string>
+    <string name="editor_delete">Delete</string>
+    <string name="editor_no_space">No free space for this widget</string>
+    <string name="editor_grid_size">Grid %1$d × %2$d</string>
+    <string name="editor_pick_title">Choose a widget</string>
+    <string name="editor_group_pointer">Pointer</string>
+    <string name="editor_group_keys">Keys</string>
+    <string name="editor_group_shortcuts">Shortcuts</string>
+
+    <string name="widget_touchpad">Touchpad</string>
+    <string name="widget_input_bar">Text input</string>
+    <string name="widget_mouse_middle">Middle</string>
+    <string name="widget_language" translatable="false">한/영</string>
+
+    <string name="virtual_keyboard_close">Close keyboard</string>
 </resources>
