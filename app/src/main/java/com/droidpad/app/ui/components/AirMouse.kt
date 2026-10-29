@@ -75,13 +75,16 @@ fun AirMouse(
         AirMouseEngine { dx, dy -> if (currentEnabled) currentAction(TouchpadAction.Move(dx, dy)) }
     }
     var padPressed by remember { mutableStateOf(false) }
-    SideEffect {
-        engine.config = AirMouseConfig(speed = speed)
-        engine.active = enabled && (padPressed == holdToMove)
-    }
 
     val sensors = rememberSensorManager()
     val gyro = remember(sensors) { sensors.getDefaultSensor(Sensor.TYPE_GYROSCOPE) }
+    // Read padPressed here, not only inside the Surface content below: the content lambda is its
+    // own recompose scope, so a press would otherwise never re-run this SideEffect.
+    val active = enabled && gyro != null && padPressed == holdToMove
+    SideEffect {
+        engine.config = AirMouseConfig(speed = speed)
+        engine.active = active
+    }
     val gravity = remember(sensors) {
         sensors.getDefaultSensor(Sensor.TYPE_GRAVITY) ?: sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }

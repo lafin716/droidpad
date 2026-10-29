@@ -90,9 +90,9 @@ fun DeskMouseLabScreen(vm: MainViewModel, onBack: () -> Unit) {
     val engine = remember {
         DeskMouseEngine { dx, dy -> if (currentConnected) vm.input.onTouchpad(TouchpadAction.Move(dx, dy)) }
     }
-    SideEffect {
-        engine.config = DeskMouseConfig(speed = speed, noiseFloor = noiseFloor, stillSeconds = stillSeconds, friction = friction)
-    }
+    // Build the config in this scope so slider changes (read only inside the cards) re-run the effect.
+    val config = DeskMouseConfig(speed = speed, noiseFloor = noiseFloor, stillSeconds = stillSeconds, friction = friction)
+    SideEffect { engine.config = config }
 
     var debug by remember { mutableStateOf(DeskMouseDebug()) }
     var sampleHz by remember { mutableIntStateOf(0) }
