@@ -2,7 +2,9 @@ package com.droidpad.app
 
 import android.app.Application
 import com.droidpad.app.data.SettingsRepository
+import com.droidpad.app.hid.BleHidPeripheral
 import com.droidpad.app.hid.HidConnectionManager
+import com.droidpad.app.hid.HidLink
 import com.droidpad.app.hid.HidReportSender
 import com.droidpad.app.hid.HidStatus
 import com.droidpad.app.input.InputController
@@ -20,7 +22,7 @@ class AppContainer(app: Application) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val settings = SettingsRepository(app)
 
-    val connection = HidConnectionManager(
+    private val classic = HidConnectionManager(
         context = app,
         lastHost = { settings.settings.value.lastHostAddress },
         autoReconnect = { settings.settings.value.autoReconnect },
@@ -29,6 +31,7 @@ class AppContainer(app: Application) {
         },
         qosPreset = { settings.settings.value.labQosPreset },
     )
+    val connection = HidLink(classic, BleHidPeripheral(app), appScope, settings.settings.value.labTransport)
     val sender = HidReportSender(connection)
     val input = InputController(sender)
 
@@ -54,6 +57,11 @@ class AppContainer(app: Application) {
             .distinctUntilChanged()
             .drop(1) // the first value is used by the initial registration
             .onEach { connection.reregister() }
+            .launchIn(appScope)
+        settings.settings
+            .map { it.labTransport }
+            .distinctUntilChanged()
+            .onEach { connection.setTransport(it) }
             .launchIn(appScope)
         connection.state
             .map { state -> state.host?.address.takeIf { state.status == HidStatus.CONNECTED } }

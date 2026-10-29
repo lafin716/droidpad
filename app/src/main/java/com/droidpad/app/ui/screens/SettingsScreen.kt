@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.FlowRow
 import com.droidpad.app.hid.HidQosPreset
+import com.droidpad.app.hid.HidTransport
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.droidpad.app.BuildConfig
@@ -189,6 +190,28 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
                     FilledTonalButton(onClick = onOpenDeskLab, modifier = Modifier.fillMaxWidth()) {
                         Icon(Icons.Outlined.Science, null, Modifier.size(18.dp))
                         Text(stringResource(R.string.settings_lab_desk_open), Modifier.padding(start = 8.dp))
+                    }
+                }
+                Text(stringResource(R.string.settings_lab_transport), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.settings_lab_transport_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HidTransport.entries.forEach { t ->
+                        FilterChip(
+                            selected = s.labTransport == t,
+                            onClick = { update { it.copy(labTransport = t) } },
+                            label = {
+                                Text(
+                                    stringResource(
+                                        if (t == HidTransport.BLE) R.string.settings_lab_transport_ble
+                                        else R.string.settings_lab_transport_classic,
+                                    ),
+                                )
+                            },
+                        )
                     }
                 }
                 Text(stringResource(R.string.settings_lab_qos), style = MaterialTheme.typography.bodyLarge)

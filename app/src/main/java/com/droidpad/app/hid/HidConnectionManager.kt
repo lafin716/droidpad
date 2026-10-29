@@ -51,6 +51,8 @@ data class HidState(
     val error: String? = null,
     /** [android.os.SystemClock.elapsedRealtime] at which "visible to other devices" ends; null when not visible. */
     val discoverableUntil: Long? = null,
+    /** Which transport this state describes (Labs › connection type). */
+    val transport: HidTransport = HidTransport.CLASSIC,
 )
 
 /**

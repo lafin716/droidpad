@@ -3,14 +3,14 @@ package com.droidpad.app
 import androidx.lifecycle.ViewModel
 import com.droidpad.app.data.AppSettings
 import com.droidpad.app.data.SettingsRepository
-import com.droidpad.app.hid.HidConnectionManager
+import com.droidpad.app.hid.HidLink
 import com.droidpad.app.hid.HidState
 import com.droidpad.app.input.InputController
 import kotlinx.coroutines.flow.StateFlow
 
 class MainViewModel(
     private val settingsRepo: SettingsRepository,
-    val connection: HidConnectionManager,
+    val connection: HidLink,
     val input: InputController,
 ) : ViewModel() {
     val hid: StateFlow<HidState> = connection.state

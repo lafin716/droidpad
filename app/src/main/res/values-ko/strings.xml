@@ -51,6 +51,7 @@
     <string name="status_registering">등록 중…</string>
     <string name="status_ready">준비됨</string>
     <string name="status_ready_short">연결 안 됨</string>
+    <string name="status_ready_ble_detail">BLE로 알리는 중입니다. 탭의 블루투스 설정에서 “%s”을(를) 페어링하세요. 페어링된 탭은 스스로 다시 연결합니다.</string>
     <string name="status_ready_detail">태블릿의 블루투스 설정에서 “%s”을(를) 페어링하거나 아래에서 연결하세요.</string>
     <string name="status_connecting">연결 중…</string>
     <string name="status_connected">연결됨</string>
@@ -187,6 +188,10 @@
     <string name="lab_noise_floor">노이즈 하한</string>
     <string name="lab_still_time">정지 감지 시간</string>
     <string name="lab_friction">마찰</string>
+<string name="settings_lab_transport">연결 방식</string>
+<string name="settings_lab_transport_desc">저전력 블루투스(BLE, HID over GATT)는 클래식보다 리포트 간격이 짧고 고를 수 있습니다. 바꾼 뒤에는 탭의 블루투스 목록에서 DroidPad를 삭제하고 탭에서 다시 페어링하세요. 아래 QoS는 클래식에만 적용됩니다.</string>
+<string name="settings_lab_transport_classic">클래식</string>
+<string name="settings_lab_transport_ble">BLE (실험)</string>
 <string name="settings_lab_qos">블루투스 QoS</string>
 <string name="settings_lab_qos_desc">DroidPad가 호스트에 알리는 전송량·지연 값입니다. 바꾸면 다시 등록되며 잠깐 연결이 끊깁니다. 연결이 안 되면 표준으로 되돌리세요.</string>
 <string name="qos_standard">표준</string>

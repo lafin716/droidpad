@@ -58,6 +58,7 @@
     <string name="status_registering">Registering…</string>
     <string name="status_ready">Ready</string>
     <string name="status_ready_short">Not connected</string>
+    <string name="status_ready_ble_detail">Advertising over Bluetooth LE. On the tablet, open Bluetooth settings and pair with “%s”. A paired tablet reconnects on its own.</string>
     <string name="status_ready_detail">Pair your tablet with “%s” in its Bluetooth settings, or connect below.</string>
     <string name="status_connecting">Connecting…</string>
     <string name="status_connected">Connected</string>
@@ -198,6 +199,10 @@
     <string name="lab_noise_floor">Noise floor</string>
     <string name="lab_still_time">Stop detection</string>
     <string name="lab_friction">Friction</string>
+<string name="settings_lab_transport">Connection type</string>
+<string name="settings_lab_transport_desc">Bluetooth LE (HID over GATT) can give the tablet a shorter, steadier report interval than classic Bluetooth. After switching, remove DroidPad from the tablet\'s Bluetooth devices and pair again from the tablet. QoS below applies to classic only.</string>
+<string name="settings_lab_transport_classic">Classic</string>
+<string name="settings_lab_transport_ble">BLE (experimental)</string>
 <string name="settings_lab_qos">Bluetooth QoS</string>
 <string name="settings_lab_qos_desc">Traffic and latency DroidPad declares to the host. Changing it re-registers and briefly disconnects. If connecting fails, switch back to Standard.</string>
 <string name="qos_standard">Standard</string>

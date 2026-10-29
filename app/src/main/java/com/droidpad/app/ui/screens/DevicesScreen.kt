@@ -49,6 +49,7 @@ import com.droidpad.app.MainViewModel
 import com.droidpad.app.R
 import com.droidpad.app.hid.HidState
 import com.droidpad.app.hid.HidStatus
+import com.droidpad.app.hid.HidTransport
 import com.droidpad.app.hid.HostDevice
 import com.droidpad.app.ui.components.DiscoverableIndicator
 import com.droidpad.app.ui.components.rememberDiscoverableRemaining
@@ -201,16 +202,19 @@ private fun StatusCard(
                 HidStatus.CONNECTED -> stringResource(R.string.status_connected_to, hid.host?.name ?: "")
                 HidStatus.READY ->
                     if (hid.reconnectAttempt > 0) stringResource(R.string.status_reconnecting, hid.reconnectAttempt)
+                    else if (hid.transport == HidTransport.BLE) stringResource(R.string.status_ready_ble_detail, adapterName ?: "DroidPad")
                     else stringResource(R.string.status_ready_detail, adapterName ?: "DroidPad")
                 HidStatus.PERMISSION_REQUIRED -> stringResource(R.string.status_permission_detail)
                 HidStatus.BLUETOOTH_OFF -> stringResource(R.string.status_bt_off_detail)
-                HidStatus.UNSUPPORTED -> stringResource(R.string.status_unsupported_detail)
+                HidStatus.UNSUPPORTED ->
+                    if (hid.transport == HidTransport.BLE) hid.error ?: stringResource(R.string.status_error)
+                    else stringResource(R.string.status_unsupported_detail)
                 HidStatus.NO_BLUETOOTH -> stringResource(R.string.status_no_bluetooth_detail)
                 HidStatus.ERROR -> hid.error ?: stringResource(R.string.status_error)
                 else -> null
             }
             if (detail != null) Text(detail, style = MaterialTheme.typography.bodyMedium)
-            if (hid.error != null && hid.status != HidStatus.ERROR) {
+            if (hid.error != null && hid.status != HidStatus.ERROR && detail != hid.error) {
                 Text(hid.error, style = MaterialTheme.typography.bodySmall, color = colors.error)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
