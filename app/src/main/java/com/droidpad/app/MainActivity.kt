@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.droidpad.app.hid.HidConnectionManager
 import com.droidpad.app.hid.HidStatus
 import com.droidpad.app.ui.screens.ControlScreen
+import com.droidpad.app.ui.screens.DeskMouseLabScreen
 import com.droidpad.app.ui.screens.DevicesScreen
 import com.droidpad.app.ui.screens.LayoutEditorScreen
 import com.droidpad.app.ui.screens.SettingsScreen
@@ -109,7 +110,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Screen { CONTROL, DEVICES, SETTINGS, LAYOUT_EDITOR }
+private enum class Screen { CONTROL, DEVICES, SETTINGS, LAYOUT_EDITOR, DESK_LAB }
 
 @Composable
 private fun DroidPadRoot(
@@ -121,7 +122,7 @@ private fun DroidPadRoot(
     var screen by rememberSaveable { mutableIntStateOf(Screen.CONTROL.ordinal) }
     val current = Screen.entries[screen]
     BackHandler(enabled = current != Screen.CONTROL) {
-        screen = if (current == Screen.LAYOUT_EDITOR) Screen.SETTINGS.ordinal else Screen.CONTROL.ordinal
+        screen = if (current == Screen.LAYOUT_EDITOR || current == Screen.DESK_LAB) Screen.SETTINGS.ordinal else Screen.CONTROL.ordinal
     }
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 600.dp
@@ -143,8 +144,10 @@ private fun DroidPadRoot(
                 vm = vm,
                 onBack = { screen = Screen.CONTROL.ordinal },
                 onEditLayout = { screen = Screen.LAYOUT_EDITOR.ordinal },
+                onOpenDeskLab = { screen = Screen.DESK_LAB.ordinal },
             )
             Screen.LAYOUT_EDITOR -> LayoutEditorScreen(vm = vm, wide = wide, onBack = { screen = Screen.SETTINGS.ordinal })
+            Screen.DESK_LAB -> DeskMouseLabScreen(vm = vm, onBack = { screen = Screen.SETTINGS.ordinal })
         }
     }
 }

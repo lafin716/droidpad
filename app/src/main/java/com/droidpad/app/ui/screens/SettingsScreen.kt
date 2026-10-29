@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,7 +52,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Unit) {
+fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Unit, onOpenDeskLab: () -> Unit) {
     val s by vm.settings.collectAsStateWithLifecycle()
     val update = vm::updateSettings
     Scaffold(
@@ -86,6 +87,15 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
                 }
                 SwitchRow(stringResource(R.string.settings_tap_to_click), null, s.tapToClick) { v -> update { it.copy(tapToClick = v) } }
                 SwitchRow(stringResource(R.string.settings_haptics), null, s.haptics) { v -> update { it.copy(haptics = v) } }
+            }
+            Section(stringResource(R.string.air_mouse_title)) {
+                SliderRow(
+                    stringResource(R.string.settings_air_speed), s.airMouseSpeed,
+                    AppSettings.MIN_POINTER_SPEED..AppSettings.MAX_POINTER_SPEED,
+                ) { v -> update { it.copy(airMouseSpeed = v) } }
+                SwitchRow(stringResource(R.string.settings_air_hold), stringResource(R.string.settings_air_hold_desc), s.airMouseHoldToMove) { v ->
+                    update { it.copy(airMouseHoldToMove = v) }
+                }
             }
             Section(stringResource(R.string.settings_layout)) {
                 Text(stringResource(R.string.settings_layout_mode), style = MaterialTheme.typography.bodyLarge)
@@ -164,6 +174,22 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
                     }
                 }
                 SwitchRow(stringResource(R.string.settings_dynamic_color), null, s.dynamicColor) { v -> update { it.copy(dynamicColor = v) } }
+            }
+            Section(stringResource(R.string.settings_labs)) {
+                Text(
+                    stringResource(R.string.settings_labs_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                SwitchRow(stringResource(R.string.lab_desk_title), stringResource(R.string.settings_lab_desk_desc), s.labDeskMouse) { v ->
+                    update { it.copy(labDeskMouse = v) }
+                }
+                if (s.labDeskMouse) {
+                    FilledTonalButton(onClick = onOpenDeskLab, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Outlined.Science, null, Modifier.size(18.dp))
+                        Text(stringResource(R.string.settings_lab_desk_open), Modifier.padding(start = 8.dp))
+                    }
+                }
             }
             Text(
                 stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),

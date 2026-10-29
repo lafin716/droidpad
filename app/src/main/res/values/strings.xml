@@ -161,4 +161,41 @@
     <string name="widget_language" translatable="false">한/영</string>
 
     <string name="virtual_keyboard_close">Close keyboard</string>
+
+    <!-- Air mouse & labs -->
+    <string name="close">Close</string>
+    <string name="not_connected_hint">Not connected. Connect a device to send input.</string>
+    <string name="air_mouse_title">Air mouse</string>
+    <string name="air_mouse_no_gyro">This device has no gyroscope, so the air mouse is unavailable.</string>
+    <string name="air_mouse_hint_hold">Hold the pad and turn the phone left/right and tilt it up/down to move the pointer.</string>
+    <string name="air_mouse_hint_always">The pointer follows the phone. Hold the pad to pause and re-centre your hand.</string>
+    <string name="air_mouse_pad_hold">Hold to move</string>
+    <string name="air_mouse_pad_pause">Hold to pause</string>
+    <string name="air_mouse_pad_tap">Quick tap = left click</string>
+    <string name="air_mouse_scroll">Scroll</string>
+    <string name="settings_air_speed">Air mouse speed</string>
+    <string name="settings_air_hold">Move only while holding</string>
+    <string name="settings_air_hold_desc">The pointer moves only while the pad is held. Turn off to always follow the phone.</string>
+    <string name="settings_labs">Labs</string>
+    <string name="settings_labs_desc">Experimental features. They may be inaccurate or change at any time.</string>
+    <string name="settings_lab_desk_desc">Slide the phone on a desk like a real mouse (accelerometer prototype).</string>
+    <string name="settings_lab_desk_open">Open desk mouse lab</string>
+    <string name="lab_desk_title">Desk mouse</string>
+    <string name="lab_experimental">Experimental prototype</string>
+    <string name="lab_desk_instructions">Lay the phone screen-up on a flat desk with its top pointing away from you. Press Start and keep it still for a second to calibrate, then slide it in short, quick strokes and stop between strokes. Accelerometers drift, so expect imprecise movement; recalibrate if the pointer creeps.</string>
+    <string name="lab_desk_no_sensor">This device has no accelerometer.</string>
+    <string name="lab_phase_paused">Paused</string>
+    <string name="lab_phase_calibrating">Calibrating… keep still</string>
+    <string name="lab_phase_still">Still</string>
+    <string name="lab_phase_moving">Moving</string>
+    <string name="lab_start">Start</string>
+    <string name="lab_pause">Pause</string>
+    <string name="lab_calibrate">Recalibrate</string>
+    <string name="lab_sensor_source">Sensor</string>
+    <string name="lab_sensor_linear">Linear acceleration</string>
+    <string name="lab_sensor_raw">Raw accelerometer</string>
+    <string name="lab_speed">Speed</string>
+    <string name="lab_noise_floor">Noise floor</string>
+    <string name="lab_still_time">Stop detection</string>
+    <string name="lab_friction">Friction</string>
 </resources>

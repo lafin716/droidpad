@@ -37,6 +37,11 @@ data class AppSettings(
     val keyboardInputMode: KeyboardInputMode = KeyboardInputMode.SYSTEM_IME,
     /** Custom layouts keyed by [CustomLayout.gridKey], so each screen size keeps its own. */
     val customLayouts: Map<String, CustomLayout> = emptyMap(),
+    val airMouseSpeed: Float = 1.0f,
+    /** Air mouse only moves the pointer while the move pad is held (clutch). */
+    val airMouseHoldToMove: Boolean = true,
+    /** Labs: shows the experimental "slide the phone on the desk" mouse. */
+    val labDeskMouse: Boolean = false,
 ) {
     companion object {
         const val MIN_POINTER_SPEED = 0.3f
@@ -82,6 +87,9 @@ class SettingsRepository(context: Context) {
             layoutMode = enumOr(prefs.getString(K_LAYOUT_MODE, null), d.layoutMode),
             keyboardInputMode = enumOr(prefs.getString(K_INPUT_MODE, null), d.keyboardInputMode),
             customLayouts = CustomLayout.decodeAll(prefs.getString(K_LAYOUTS, null)),
+            airMouseSpeed = prefs.getFloat(K_AIR_SPEED, d.airMouseSpeed),
+            airMouseHoldToMove = prefs.getBoolean(K_AIR_HOLD, d.airMouseHoldToMove),
+            labDeskMouse = prefs.getBoolean(K_LAB_DESK, d.labDeskMouse),
         )
     }
 
@@ -104,6 +112,9 @@ class SettingsRepository(context: Context) {
         putString(K_LAYOUT_MODE, s.layoutMode.name)
         putString(K_INPUT_MODE, s.keyboardInputMode.name)
         putString(K_LAYOUTS, CustomLayout.encodeAll(s.customLayouts))
+        putFloat(K_AIR_SPEED, s.airMouseSpeed)
+        putBoolean(K_AIR_HOLD, s.airMouseHoldToMove)
+        putBoolean(K_LAB_DESK, s.labDeskMouse)
     }
 
     private inline fun <reified E : Enum<E>> enumOr(name: String?, default: E): E =
@@ -128,5 +139,8 @@ class SettingsRepository(context: Context) {
         const val K_LAYOUT_MODE = "layout_mode"
         const val K_INPUT_MODE = "keyboard_input_mode"
         const val K_LAYOUTS = "custom_layouts"
+        const val K_AIR_SPEED = "air_mouse_speed"
+        const val K_AIR_HOLD = "air_mouse_hold_to_move"
+        const val K_LAB_DESK = "lab_desk_mouse"
     }
 }

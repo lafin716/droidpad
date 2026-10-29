@@ -10,6 +10,7 @@ enum class WidgetType(val minW: Int = 1, val minH: Int = 1, val defaultW: Int = 
     MOUSE_LEFT(defaultW = 2),
     MOUSE_RIGHT(defaultW = 2),
     MOUSE_MIDDLE,
+    AIR_MOUSE,
     LANGUAGE,
     CTRL,
     SHIFT,

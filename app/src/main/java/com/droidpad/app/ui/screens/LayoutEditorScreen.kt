@@ -81,7 +81,7 @@ private data class PickRequest(val x: Int? = null, val y: Int? = null)
 
 private val PICKER_GROUPS: List<Pair<Int, List<WidgetType>>> = listOf(
     R.string.editor_group_pointer to listOf(
-        WidgetType.TOUCHPAD, WidgetType.MOUSE_LEFT, WidgetType.MOUSE_RIGHT, WidgetType.MOUSE_MIDDLE,
+        WidgetType.TOUCHPAD, WidgetType.MOUSE_LEFT, WidgetType.MOUSE_RIGHT, WidgetType.MOUSE_MIDDLE, WidgetType.AIR_MOUSE,
     ),
     R.string.editor_group_keys to listOf(WidgetType.INPUT_BAR) +
         WidgetType.entries.filter { it.ordinal in WidgetType.LANGUAGE.ordinal..WidgetType.F12.ordinal },

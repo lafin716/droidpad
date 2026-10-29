@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.BluetoothConnected
 import androidx.compose.material.icons.outlined.BluetoothDisabled
+import androidx.compose.material.icons.outlined.ControlCamera
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.TouchApp
@@ -64,6 +65,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.droidpad.app.data.CustomLayout
 import com.droidpad.app.data.KeyboardInputMode
 import com.droidpad.app.data.LayoutMode
+import com.droidpad.app.ui.components.AirMouse
 import com.droidpad.app.ui.components.ControlGrid
 import com.droidpad.app.ui.components.GRID_GAP
 import com.droidpad.app.ui.components.GridWidget
@@ -88,6 +90,8 @@ fun ControlScreen(
     val connected = hid.status == HidStatus.CONNECTED
     var virtualOpen by rememberSaveable { mutableStateOf(false) }
     val openVirtual = { virtualOpen = true }
+    var airOpen by rememberSaveable { mutableStateOf(false) }
+    val openAir = { airOpen = true }
 
     Box(Modifier.fillMaxSize()) {
         Scaffold(
@@ -96,6 +100,9 @@ fun ControlScreen(
                     title = { Text(stringResource(R.string.app_name)) },
                     actions = {
                         ConnectionChip(hid, onOpenDevices)
+                        IconButton(onClick = openAir) {
+                            Icon(Icons.Outlined.ControlCamera, stringResource(R.string.air_mouse_title))
+                        }
                         IconButton(onClick = onOpenSettings) {
                             Icon(Icons.Outlined.Settings, stringResource(R.string.settings_title))
                         }
@@ -105,7 +112,7 @@ fun ControlScreen(
             },
         ) { padding ->
             if (settings.layoutMode == LayoutMode.CUSTOM) {
-                CustomControls(vm, settings, connected, wide, openVirtual, Modifier.controlGridArea(padding))
+                CustomControls(vm, settings, connected, wide, openVirtual, openAir, Modifier.controlGridArea(padding))
             } else {
                 PresetControls(vm, settings, connected, wide, openVirtual, padding)
             }
@@ -121,6 +128,17 @@ fun ControlScreen(
                 hostLanguage = language,
                 capsLock = caps,
                 onClose = { virtualOpen = false },
+            )
+        }
+        if (airOpen) {
+            AirMouse(
+                enabled = connected,
+                speed = settings.airMouseSpeed,
+                holdToMove = settings.airMouseHoldToMove,
+                scrollSpeed = settings.scrollSpeed,
+                naturalScroll = settings.naturalScroll,
+                onAction = vm.input::onTouchpad,
+                onClose = { airOpen = false },
             )
         }
     }
@@ -190,6 +208,7 @@ private fun CustomControls(
     connected: Boolean,
     wide: Boolean,
     onOpenVirtualKeyboard: () -> Unit,
+    onOpenAirMouse: () -> Unit,
     modifier: Modifier,
 ) {
     val mirrored by vm.mirrored.collectAsStateWithLifecycle()
@@ -209,6 +228,7 @@ private fun CustomControls(
         haptics = settings.haptics,
         inputMode = settings.keyboardInputMode,
         onOpenVirtualKeyboard = onOpenVirtualKeyboard,
+        onOpenAirMouse = onOpenAirMouse,
     )
     ControlGrid(modifier) { grid ->
         val layout = settings.customLayouts[CustomLayout.gridKey(grid.cols, grid.rows)]

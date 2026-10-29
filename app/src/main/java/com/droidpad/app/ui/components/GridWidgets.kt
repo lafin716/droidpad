@@ -17,6 +17,8 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardReturn
 import androidx.compose.material.icons.automirrored.outlined.KeyboardTab
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.ControlCamera
+import androidx.compose.material3.Icon
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -91,6 +93,7 @@ data class GridWidgetState(
     val haptics: Boolean,
     val inputMode: KeyboardInputMode,
     val onOpenVirtualKeyboard: () -> Unit,
+    val onOpenAirMouse: () -> Unit,
 )
 
 /** Interactive widget for one layout cell group. */
@@ -138,7 +141,25 @@ fun GridWidget(item: LayoutItem, state: GridWidgetState, modifier: Modifier = Mo
             }
         }
         WidgetType.LANGUAGE -> LanguageKey(state.hostLanguage, state.enabled, c, modifier)
+        WidgetType.AIR_MOUSE -> AirMouseKey(state.onOpenAirMouse, modifier)
         else -> keySpecFor(type)?.let { Key(it, c, state.enabled, modifier) }
+    }
+}
+
+/** Opens the full-screen air mouse; usable while disconnected so the overlay can explain why. */
+@Composable
+private fun AirMouseKey(onClick: () -> Unit, modifier: Modifier) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = colors.tertiaryContainer,
+        contentColor = colors.onTertiaryContainer,
+        modifier = modifier,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(Icons.Outlined.ControlCamera, widgetLabel(WidgetType.AIR_MOUSE))
+        }
     }
 }
 
@@ -269,6 +290,7 @@ fun widgetLabel(type: WidgetType): String {
         WidgetType.MOUSE_LEFT -> stringResource(R.string.mouse_left)
         WidgetType.MOUSE_RIGHT -> stringResource(R.string.mouse_right)
         WidgetType.MOUSE_MIDDLE -> stringResource(R.string.widget_mouse_middle)
+        WidgetType.AIR_MOUSE -> stringResource(R.string.air_mouse_title)
         WidgetType.LANGUAGE -> stringResource(R.string.widget_language)
         WidgetType.CTRL -> stringResource(R.string.key_ctrl)
         WidgetType.SHIFT -> stringResource(R.string.key_shift)
