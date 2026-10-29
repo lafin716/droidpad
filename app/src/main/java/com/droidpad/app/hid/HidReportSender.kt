@@ -12,6 +12,11 @@ fun interface ReportTransport {
 /**
  * Serialises all HID reports on one background thread so binder calls never block the UI, and
  * coalesces pointer movement so a burst of touch events becomes a few reports.
+ *
+ * Movement is paced to at most one report per [moveIntervalMs]. `sendReport` returns as soon as
+ * the report is queued in the Bluetooth stack, so sending faster than the link drains (one report
+ * per connection/sniff interval) only grows that queue and the pointer trails the finger further
+ * and further. Pacing keeps the queue short; the movement made meanwhile is summed, not dropped.
  */
 class HidReportSender(
     private val transport: ReportTransport,
@@ -20,11 +25,18 @@ class HidReportSender(
     },
     private val sleeper: (Long) -> Unit = { Thread.sleep(it) },
     private val keyGapMs: Long = 4,
+    moveIntervalMs: Long = MOVE_INTERVAL_MS,
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
 ) {
+    /** Minimum gap between movement reports; 0 sends every coalesced batch immediately. */
+    @Volatile var moveIntervalMs: Long = moveIntervalMs
+
     private val lock = Any()
     private var pendingDx = 0
     private var pendingDy = 0
     private var moveScheduled = false
+    /** Time of the last movement report; only touched on the executor thread. */
+    private var lastMoveAt = Long.MIN_VALUE / 2
 
     /** Only touched on the executor thread. */
     private var buttons = 0
@@ -107,6 +119,12 @@ class HidReportSender(
     }
 
     private fun flushMove() {
+        // Wait out the interval while further movement keeps accumulating into pendingDx/Dy.
+        val interval = moveIntervalMs
+        if (interval > 0) {
+            val wait = lastMoveAt + interval - clock()
+            if (wait > 0) sleeper(wait)
+        }
         val dx: Int
         val dy: Int
         synchronized(lock) {
@@ -117,6 +135,7 @@ class HidReportSender(
         val xs = PointerMath.split(dx)
         val ys = PointerMath.split(dy)
         for (i in 0 until maxOf(xs.size, ys.size)) mouse(xs.getOrElse(i) { 0 }, ys.getOrElse(i) { 0 })
+        lastMoveAt = clock()
     }
 
     private fun mouse(dx: Int, dy: Int, wheel: Int = 0, pan: Int = 0) {
@@ -142,5 +161,7 @@ class HidReportSender(
     companion object {
         /** A boot keyboard report carries at most six simultaneous keys. */
         const val MAX_HELD = 6
+        /** ~83 Hz, just above the 11.25 ms latency requested in the HID QoS settings. */
+        const val MOVE_INTERVAL_MS = 12L
     }
 }

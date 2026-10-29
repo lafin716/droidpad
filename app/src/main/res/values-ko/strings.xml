@@ -187,4 +187,14 @@
     <string name="lab_noise_floor">노이즈 하한</string>
     <string name="lab_still_time">정지 감지 시간</string>
     <string name="lab_friction">마찰</string>
+<string name="settings_lab_qos">블루투스 QoS</string>
+<string name="settings_lab_qos_desc">DroidPad가 호스트에 알리는 전송량·지연 값입니다. 바꾸면 다시 등록되며 잠깐 연결이 끊깁니다. 연결이 안 되면 표준으로 되돌리세요.</string>
+<string name="qos_standard">표준</string>
+<string name="qos_high_bandwidth">고대역</string>
+<string name="qos_low_latency">저지연</string>
+<string name="qos_guaranteed">보장형</string>
+<string name="qos_none">미지정</string>
+<string name="settings_lab_move_interval">포인터 리포트 간격</string>
+<string name="settings_lab_move_interval_desc">포인터 이동 리포트 사이의 최소 간격입니다. 그 사이 움직임은 합쳐서 보내며 사라지지 않습니다. 기본 12ms.</string>
+<string name="settings_lab_move_unpaced">제한 없음</string>
 </resources>

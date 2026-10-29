@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.FlowRow
+import com.droidpad.app.hid.HidQosPreset
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.droidpad.app.BuildConfig
@@ -190,6 +191,38 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
                         Text(stringResource(R.string.settings_lab_desk_open), Modifier.padding(start = 8.dp))
                     }
                 }
+                Text(stringResource(R.string.settings_lab_qos), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.settings_lab_qos_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HidQosPreset.entries.forEach { preset ->
+                        FilterChip(
+                            selected = s.labQosPreset == preset,
+                            onClick = { update { it.copy(labQosPreset = preset) } },
+                            label = { Text(stringResource(qosLabel(preset))) },
+                        )
+                    }
+                }
+                Text(stringResource(R.string.settings_lab_move_interval), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.settings_lab_move_interval_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LAB_MOVE_INTERVALS.forEach { ms ->
+                        FilterChip(
+                            selected = s.labMoveIntervalMs == ms,
+                            onClick = { update { it.copy(labMoveIntervalMs = ms) } },
+                            label = {
+                                Text(if (ms == 0) stringResource(R.string.settings_lab_move_unpaced) else "$ms ms")
+                            },
+                        )
+                    }
+                }
             }
             Text(
                 stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
@@ -198,6 +231,16 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
             )
         }
     }
+}
+
+private val LAB_MOVE_INTERVALS = listOf(0, 8, 12, 16)
+
+private fun qosLabel(preset: HidQosPreset): Int = when (preset) {
+    HidQosPreset.STANDARD -> R.string.qos_standard
+    HidQosPreset.HIGH_BANDWIDTH -> R.string.qos_high_bandwidth
+    HidQosPreset.LOW_LATENCY -> R.string.qos_low_latency
+    HidQosPreset.GUARANTEED -> R.string.qos_guaranteed
+    HidQosPreset.NONE -> R.string.qos_none
 }
 
 @Composable

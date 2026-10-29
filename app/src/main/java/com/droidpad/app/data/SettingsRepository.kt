@@ -3,6 +3,8 @@ package com.droidpad.app.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.droidpad.app.hid.HidQosPreset
+import com.droidpad.app.hid.HidReportSender
 import com.droidpad.app.input.keyboard.LanguageToggleKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +44,10 @@ data class AppSettings(
     val airMouseHoldToMove: Boolean = true,
     /** Labs: shows the experimental "slide the phone on the desk" mouse. */
     val labDeskMouse: Boolean = false,
+    /** Labs: Bluetooth QoS declared when registering the HID app. */
+    val labQosPreset: HidQosPreset = HidQosPreset.STANDARD,
+    /** Labs: minimum gap between pointer movement reports (0 = unpaced). */
+    val labMoveIntervalMs: Int = HidReportSender.MOVE_INTERVAL_MS.toInt(),
 ) {
     companion object {
         const val MIN_POINTER_SPEED = 0.3f
@@ -90,6 +96,8 @@ class SettingsRepository(context: Context) {
             airMouseSpeed = prefs.getFloat(K_AIR_SPEED, d.airMouseSpeed),
             airMouseHoldToMove = prefs.getBoolean(K_AIR_HOLD, d.airMouseHoldToMove),
             labDeskMouse = prefs.getBoolean(K_LAB_DESK, d.labDeskMouse),
+            labQosPreset = enumOr(prefs.getString(K_LAB_QOS, null), d.labQosPreset),
+            labMoveIntervalMs = prefs.getInt(K_LAB_MOVE_INTERVAL, d.labMoveIntervalMs),
         )
     }
 
@@ -115,6 +123,8 @@ class SettingsRepository(context: Context) {
         putFloat(K_AIR_SPEED, s.airMouseSpeed)
         putBoolean(K_AIR_HOLD, s.airMouseHoldToMove)
         putBoolean(K_LAB_DESK, s.labDeskMouse)
+        putString(K_LAB_QOS, s.labQosPreset.name)
+        putInt(K_LAB_MOVE_INTERVAL, s.labMoveIntervalMs)
     }
 
     private inline fun <reified E : Enum<E>> enumOr(name: String?, default: E): E =
@@ -142,5 +152,7 @@ class SettingsRepository(context: Context) {
         const val K_AIR_SPEED = "air_mouse_speed"
         const val K_AIR_HOLD = "air_mouse_hold_to_move"
         const val K_LAB_DESK = "lab_desk_mouse"
+        const val K_LAB_QOS = "lab_qos_preset"
+        const val K_LAB_MOVE_INTERVAL = "lab_move_interval_ms"
     }
 }

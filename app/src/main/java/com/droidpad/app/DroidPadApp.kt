@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -26,6 +27,7 @@ class AppContainer(app: Application) {
         onHostConnected = { host ->
             settings.update { it.copy(lastHostAddress = host.address, lastHostName = host.name) }
         },
+        qosPreset = { settings.settings.value.labQosPreset },
     )
     val sender = HidReportSender(connection)
     val input = InputController(sender)
@@ -36,6 +38,17 @@ class AppContainer(app: Application) {
             .map { it.autoLanguageSwitch to it.languageToggleKey }
             .distinctUntilChanged()
             .onEach { (auto, key) -> input.configure(auto, key) }
+            .launchIn(appScope)
+        settings.settings
+            .map { it.labMoveIntervalMs }
+            .distinctUntilChanged()
+            .onEach { sender.moveIntervalMs = it.toLong() }
+            .launchIn(appScope)
+        settings.settings
+            .map { it.labQosPreset }
+            .distinctUntilChanged()
+            .drop(1) // the first value is used by the initial registration
+            .onEach { connection.reregister() }
             .launchIn(appScope)
         connection.state
             .map { state -> state.host?.address.takeIf { state.status == HidStatus.CONNECTED } }

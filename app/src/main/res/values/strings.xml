@@ -198,4 +198,14 @@
     <string name="lab_noise_floor">Noise floor</string>
     <string name="lab_still_time">Stop detection</string>
     <string name="lab_friction">Friction</string>
+<string name="settings_lab_qos">Bluetooth QoS</string>
+<string name="settings_lab_qos_desc">Traffic and latency DroidPad declares to the host. Changing it re-registers and briefly disconnects. If connecting fails, switch back to Standard.</string>
+<string name="qos_standard">Standard</string>
+<string name="qos_high_bandwidth">High bandwidth</string>
+<string name="qos_low_latency">Low latency</string>
+<string name="qos_guaranteed">Guaranteed</string>
+<string name="qos_none">Unspecified</string>
+<string name="settings_lab_move_interval">Pointer report interval</string>
+<string name="settings_lab_move_interval_desc">Minimum gap between pointer reports. Movement in between is merged, not lost. Default 12 ms.</string>
+<string name="settings_lab_move_unpaced">Unlimited</string>
 </resources>

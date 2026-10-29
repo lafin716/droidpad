@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHidDevice
-import android.bluetooth.BluetoothHidDeviceAppQosSettings
 import android.bluetooth.BluetoothHidDeviceAppSdpSettings
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
@@ -65,6 +64,7 @@ class HidConnectionManager(
     private val lastHost: () -> String?,
     private val autoReconnect: () -> Boolean,
     private val onHostConnected: (HostDevice) -> Unit,
+    private val qosPreset: () -> HidQosPreset = { HidQosPreset.STANDARD },
 ) : ReportTransport {
 
     private val main = Handler(Looper.getMainLooper())
@@ -90,6 +90,8 @@ class HidConnectionManager(
     private var closed = false
     /** Device the user asked to pair from this app; connected automatically once bonded. */
     private var pairingAddress: String? = null
+    /** Set by [reregister]: the next "unregistered" callback registers again instead of erroring. */
+    private var reregisterPending = false
     private val proxyTimeout = Runnable {
         if (hid == null) setStatus(HidStatus.UNSUPPORTED, "HID Device profile proxy did not respond")
     }
@@ -174,16 +176,38 @@ class HidConnectionManager(
             SDP_NAME, SDP_DESCRIPTION, SDP_PROVIDER,
             BluetoothHidDevice.SUBCLASS1_COMBO, HidDescriptor.bytes,
         )
-        val qos = BluetoothHidDeviceAppQosSettings(
-            BluetoothHidDeviceAppQosSettings.SERVICE_BEST_EFFORT,
-            800, 9, 0, 11250, BluetoothHidDeviceAppQosSettings.MAX,
-        )
+        val preset = qosPreset()
+        Log.i(TAG, "registerApp with QoS $preset ${preset.params}")
         val ok = try {
-            device.registerApp(sdp, null, qos, callbackExecutor, hidCallback)
+            device.registerApp(sdp, null, preset.params?.toSettings(), callbackExecutor, hidCallback)
         } catch (e: SecurityException) {
             false.also { Log.w(TAG, "registerApp denied", e) }
         }
         if (!ok) setStatus(HidStatus.ERROR, "Could not register as a HID device. Another HID app may be active.")
+    }
+
+    /**
+     * Registers the HID app again so a changed [qosPreset] takes effect. This drops the current
+     * host connection; auto-reconnect brings it back once registered.
+     */
+    fun reregister() {
+        val proxy = hid ?: return
+        if (!registered) {
+            // A registration in flight reads the new preset itself; otherwise retry a failed one.
+            if (_state.value.status == HidStatus.ERROR) register(proxy)
+            return
+        }
+        reregisterPending = true
+        val ok = try {
+            proxy.unregisterApp()
+        } catch (e: SecurityException) {
+            false.also { Log.w(TAG, "unregisterApp denied", e) }
+        }
+        if (!ok) {
+            reregisterPending = false
+            registered = false
+            register(proxy)
+        }
     }
 
     private val hidCallback = object : BluetoothHidDevice.Callback() {
@@ -192,6 +216,12 @@ class HidConnectionManager(
             if (!registered) {
                 connected = null
                 _state.update { it.copy(host = null) }
+                val proxy = hid
+                if (reregisterPending && proxy != null) {
+                    reregisterPending = false
+                    register(proxy)
+                    return@post
+                }
                 if (hid != null && adapter?.isEnabled == true) setStatus(HidStatus.ERROR, "HID app was unregistered")
                 return@post
             }

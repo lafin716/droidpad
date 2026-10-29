@@ -94,4 +94,46 @@ class HidReportSenderTest {
         sender.keyUp(KeyStroke(KeyCodes.UP, Modifier.LEFT_SHIFT))
         assertEquals(List(8) { 0 }, t.keyboard.last())
     }
+
+    @Test
+    fun movesArePacedAndCoalesced() {
+        var now = 1_000L
+        val sleeps = ArrayList<Long>()
+        val queue = ArrayDeque<Runnable>()
+        val paced = HidReportSender(
+            t, executor = { queue += it }, sleeper = { sleeps += it; now += it },
+            moveIntervalMs = 12, clock = { now },
+        )
+        paced.move(3, 0)
+        queue.removeFirst().run()
+        assertEquals(emptyList<Long>(), sleeps)
+
+        // Two moves 4 ms later: one report after the remaining 8 ms, carrying both.
+        now += 4
+        paced.move(2, 1)
+        paced.move(1, 1)
+        assertEquals(1, queue.size)
+        queue.removeFirst().run()
+        assertEquals(listOf(8L), sleeps)
+        assertEquals(listOf(listOf(0, 3, 0, 0, 0), listOf(0, 3, 2, 0, 0)), t.mouse)
+    }
+
+    @Test
+    fun zeroIntervalSendsWithoutWaiting() {
+        var now = 1_000L
+        val sleeps = ArrayList<Long>()
+        val queue = ArrayDeque<Runnable>()
+        val paced = HidReportSender(
+            t, executor = { queue += it }, sleeper = { sleeps += it; now += it },
+            moveIntervalMs = 12, clock = { now },
+        )
+        paced.moveIntervalMs = 0
+        paced.move(3, 0)
+        queue.removeFirst().run()
+        now += 1
+        paced.move(2, 0)
+        queue.removeFirst().run()
+        assertEquals(emptyList<Long>(), sleeps)
+        assertEquals(listOf(listOf(0, 3, 0, 0, 0), listOf(0, 2, 0, 0, 0)), t.mouse)
+    }
 }
