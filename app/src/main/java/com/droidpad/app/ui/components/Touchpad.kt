@@ -37,6 +37,10 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
+import android.view.InputDevice
+import android.view.View
+import java.util.WeakHashMap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -76,6 +80,7 @@ fun TouchpadSurface(
         }
     }
     LaunchedEffect(config, density) { engine.config = config.copy(density = density) }
+    UnbufferedPointerDispatch()
 
     val shape = RoundedCornerShape(28.dp)
     val colors = MaterialTheme.colorScheme
@@ -155,6 +160,32 @@ fun TouchpadSurface(
                 color = colors.onPrimaryContainer,
                 modifier = Modifier.align(Alignment.TopCenter).padding(12.dp),
             )
+        }
+    }
+}
+
+private val unbufferedRequests = WeakHashMap<View, Int>()
+
+/**
+ * While in composition, asks the window to deliver touch events as soon as they arrive instead
+ * of batching them once per display frame. That removes up to a frame of latency and hands the
+ * pointer engines every hardware sample. Reference-counted per view; main thread only.
+ */
+@Composable
+fun UnbufferedPointerDispatch() {
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val count = unbufferedRequests[view] ?: 0
+        unbufferedRequests[view] = count + 1
+        if (count == 0) view.requestUnbufferedDispatch(InputDevice.SOURCE_CLASS_POINTER)
+        onDispose {
+            val left = (unbufferedRequests[view] ?: 1) - 1
+            if (left <= 0) {
+                unbufferedRequests.remove(view)
+                view.requestUnbufferedDispatch(InputDevice.SOURCE_CLASS_NONE)
+            } else {
+                unbufferedRequests[view] = left
+            }
         }
     }
 }

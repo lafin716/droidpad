@@ -28,7 +28,7 @@ android {
         minSdk = 31
         targetSdk = 35
         versionCode = (System.getenv("DROIDPAD_VERSION_CODE") ?: "1").toInt()
-        versionName = System.getenv("DROIDPAD_VERSION_NAME") ?: "1.3.0"
+        versionName = System.getenv("DROIDPAD_VERSION_NAME") ?: "1.4.0"
     }
 
     signingConfigs {

@@ -197,4 +197,7 @@
 <string name="settings_lab_move_interval">포인터 리포트 간격</string>
 <string name="settings_lab_move_interval_desc">포인터 이동 리포트 사이의 최소 간격입니다. 그 사이 움직임은 합쳐서 보내며 사라지지 않습니다. 기본 12ms.</string>
 <string name="settings_lab_move_unpaced">제한 없음</string>
+<string name="settings_lab_move_smoothing">포인터 보간</string>
+<string name="settings_lab_move_smoothing_desc">움직임을 리포트마다 고르게 나눠 보내 빠르게 움직일 때 뚝뚝 끊기지 않게 합니다. 대신 이 시간만큼 지연됩니다. 리포트 간격이 "제한 없음"이면 동작하지 않습니다. 기본 8ms.</string>
+<string name="settings_lab_move_smoothing_off">끔</string>
 </resources>

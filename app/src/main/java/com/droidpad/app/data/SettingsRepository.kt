@@ -48,6 +48,8 @@ data class AppSettings(
     val labQosPreset: HidQosPreset = HidQosPreset.STANDARD,
     /** Labs: minimum gap between pointer movement reports (0 = unpaced). */
     val labMoveIntervalMs: Int = HidReportSender.MOVE_INTERVAL_MS.toInt(),
+    /** Labs: delay used to spread pointer motion evenly over reports (0 = off). */
+    val labMoveSmoothingMs: Int = HidReportSender.MOVE_SMOOTHING_MS.toInt(),
 ) {
     companion object {
         const val MIN_POINTER_SPEED = 0.3f
@@ -98,6 +100,7 @@ class SettingsRepository(context: Context) {
             labDeskMouse = prefs.getBoolean(K_LAB_DESK, d.labDeskMouse),
             labQosPreset = enumOr(prefs.getString(K_LAB_QOS, null), d.labQosPreset),
             labMoveIntervalMs = prefs.getInt(K_LAB_MOVE_INTERVAL, d.labMoveIntervalMs),
+            labMoveSmoothingMs = prefs.getInt(K_LAB_MOVE_SMOOTHING, d.labMoveSmoothingMs),
         )
     }
 
@@ -125,6 +128,7 @@ class SettingsRepository(context: Context) {
         putBoolean(K_LAB_DESK, s.labDeskMouse)
         putString(K_LAB_QOS, s.labQosPreset.name)
         putInt(K_LAB_MOVE_INTERVAL, s.labMoveIntervalMs)
+        putInt(K_LAB_MOVE_SMOOTHING, s.labMoveSmoothingMs)
     }
 
     private inline fun <reified E : Enum<E>> enumOr(name: String?, default: E): E =
@@ -154,5 +158,6 @@ class SettingsRepository(context: Context) {
         const val K_LAB_DESK = "lab_desk_mouse"
         const val K_LAB_QOS = "lab_qos_preset"
         const val K_LAB_MOVE_INTERVAL = "lab_move_interval_ms"
+        const val K_LAB_MOVE_SMOOTHING = "lab_move_smoothing_ms"
     }
 }

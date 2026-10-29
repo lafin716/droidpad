@@ -22,9 +22,11 @@ data class AirMouseConfig(
  * vector) moves the pointer horizontally; tilting its top up/down (rotation about the device X
  * axis) moves it vertically. Using gravity makes this work whether the phone is held flat or
  * upright. Gyro rates are integrated once, so there is no position drift.
+ *
+ * Thread-safe: samples may arrive on a sensor thread while [config] / [active] change on the UI thread.
  */
 class AirMouseEngine(
-    var config: AirMouseConfig = AirMouseConfig(),
+    @Volatile var config: AirMouseConfig = AirMouseConfig(),
     private val emit: (dx: Int, dy: Int) -> Unit,
 ) {
     private var gx = 0f
@@ -36,13 +38,14 @@ class AirMouseEngine(
     private var remY = 0f
 
     /** Motion is only emitted while active (e.g. while the clutch is held). */
-    var active: Boolean = false
-        set(value) {
+    @Volatile var active: Boolean = false
+        @Synchronized set(value) {
             if (field != value) reset()
             field = value
         }
 
     /** Gravity (or raw accelerometer) reading in device coordinates, any unit. */
+    @Synchronized
     fun onGravity(x: Float, y: Float, z: Float) {
         val n = sqrt(x * x + y * y + z * z)
         if (n < 1e-3f) return
@@ -50,6 +53,7 @@ class AirMouseEngine(
     }
 
     /** Angular velocity in rad/s (Android gyroscope axes) over [dtSec] seconds. */
+    @Synchronized
     fun onGyro(wx: Float, wy: Float, wz: Float, dtSec: Float) {
         if (!active || dtSec <= 0f) return
         // Android rates are counter-clockwise positive: turning left / tilting up is positive.
@@ -66,6 +70,7 @@ class AirMouseEngine(
         if (dx != 0 || dy != 0) emit(dx, dy)
     }
 
+    @Synchronized
     fun reset() {
         rateX = 0f; rateY = 0f
         remX = 0f; remY = 0f

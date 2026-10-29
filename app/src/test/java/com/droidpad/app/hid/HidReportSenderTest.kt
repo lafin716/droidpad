@@ -136,4 +136,53 @@ class HidReportSenderTest {
         assertEquals(emptyList<Long>(), sleeps)
         assertEquals(listOf(listOf(0, 3, 0, 0, 0), listOf(0, 2, 0, 0, 0)), t.mouse)
     }
+
+    /** Feeds 16 counts every 8 ms (like 120 Hz touch) for [ms] and returns the x of every report. */
+    private fun steadyStream(smoothingMs: Long, ms: Int = 200): List<Int> {
+        var now = 1_000L
+        val queue = ArrayDeque<Runnable>()
+        lateinit var paced: HidReportSender
+        fun tick() {
+            now++
+            if (now % 8 == 0L && now < 1_000L + ms) paced.move(16, 0)
+        }
+        paced = HidReportSender(
+            t, executor = { queue += it }, sleeper = { repeat(it.toInt()) { tick() } },
+            moveIntervalMs = 12, smoothingMs = smoothingMs, clock = { now },
+        )
+        while (now < 1_000L + ms + 50) if (queue.isNotEmpty()) queue.removeFirst().run() else tick()
+        return t.mouse.map { it[1] }
+    }
+
+    @Test
+    fun withoutSmoothingStepsBeatBetweenInputAndReportRate() {
+        val steps = steadyStream(smoothingMs = 0)
+        assertEquals(setOf(16, 32), steps.drop(2).dropLast(2).toSet())
+    }
+
+    @Test
+    fun smoothingGivesEvenStepsAndKeepsTotal() {
+        val steps = steadyStream(smoothingMs = 8)
+        assertEquals(setOf(24), steps.drop(2).dropLast(2).toSet())
+        assertEquals(24 * 16, steps.sum()) // every input (1008..1192 ms) arrives in full
+    }
+
+    @Test
+    fun clickFlushesSmoothedMotionFirst() {
+        var now = 1_000L
+        val queue = ArrayDeque<Runnable>()
+        val paced = HidReportSender(
+            t, executor = { queue += it }, sleeper = { now += it },
+            moveIntervalMs = 12, smoothingMs = 8, clock = { now },
+        )
+        paced.move(5, 0)
+        now += 4
+        paced.move(7, 0)
+        paced.click(MouseButton.LEFT)
+        // The click runs before the paced flush, but still lands after all the motion.
+        queue.removeAt(1).run()
+        assertEquals(listOf(listOf(0, 12, 0, 0, 0), listOf(1, 0, 0, 0, 0), listOf(0, 0, 0, 0, 0)), t.mouse)
+        queue.removeFirst().run()
+        assertEquals(3, t.mouse.size)
+    }
 }

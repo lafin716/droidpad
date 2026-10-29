@@ -208,4 +208,7 @@
 <string name="settings_lab_move_interval">Pointer report interval</string>
 <string name="settings_lab_move_interval_desc">Minimum gap between pointer reports. Movement in between is merged, not lost. Default 12 ms.</string>
 <string name="settings_lab_move_unpaced">Unlimited</string>
+<string name="settings_lab_move_smoothing">Pointer smoothing</string>
+<string name="settings_lab_move_smoothing_desc">Spreads movement evenly over reports so fast motion does not stutter, at the cost of this much delay. Needs a report interval. Default 8 ms.</string>
+<string name="settings_lab_move_smoothing_off">Off</string>
 </resources>

@@ -223,6 +223,23 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
                         )
                     }
                 }
+                Text(stringResource(R.string.settings_lab_move_smoothing), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.settings_lab_move_smoothing_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LAB_MOVE_SMOOTHINGS.forEach { ms ->
+                        FilterChip(
+                            selected = s.labMoveSmoothingMs == ms,
+                            onClick = { update { it.copy(labMoveSmoothingMs = ms) } },
+                            label = {
+                                Text(if (ms == 0) stringResource(R.string.settings_lab_move_smoothing_off) else "$ms ms")
+                            },
+                        )
+                    }
+                }
             }
             Text(
                 stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
@@ -234,6 +251,7 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
 }
 
 private val LAB_MOVE_INTERVALS = listOf(0, 8, 12, 16)
+private val LAB_MOVE_SMOOTHINGS = listOf(0, 8, 16)
 
 private fun qosLabel(preset: HidQosPreset): Int = when (preset) {
     HidQosPreset.STANDARD -> R.string.qos_standard

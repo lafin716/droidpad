@@ -88,8 +88,11 @@ fun AirMouse(
     val gravity = remember(sensors) {
         sensors.getDefaultSensor(Sensor.TYPE_GRAVITY) ?: sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
-    SensorEffect(sensors, gravity) { v, _ -> engine.onGravity(v[0], v[1], v[2]) }
-    SensorEffect(sensors, gyro) { v, dt -> engine.onGyro(v[0], v[1], v[2], dt) }
+    // Off the main thread: the engine and the HID sender are thread-safe, and UI work there
+    // would otherwise delay and bunch up the 200 Hz gyro samples.
+    SensorEffect(sensors, gravity, offMainThread = true) { v, _ -> engine.onGravity(v[0], v[1], v[2]) }
+    SensorEffect(sensors, gyro, offMainThread = true) { v, dt -> engine.onGyro(v[0], v[1], v[2], dt) }
+    UnbufferedPointerDispatch()
 
     val colors = MaterialTheme.colorScheme
     Surface(modifier.fillMaxSize(), color = colors.surface) {

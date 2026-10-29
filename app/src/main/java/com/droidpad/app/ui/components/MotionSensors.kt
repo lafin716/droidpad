@@ -8,6 +8,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Process
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -21,6 +24,15 @@ private const val SAMPLING_PERIOD_US = 5_000
 /** Longest gap trusted between two samples; larger gaps (pauses, first sample) are dropped. */
 private const val MAX_DT_SEC = 0.05f
 
+/**
+ * Shared thread for latency-sensitive sensors, so samples are not queued behind UI work
+ * (layout, drawing, recomposition) on the main thread.
+ */
+private val sensorHandler: Handler by lazy {
+    val thread = HandlerThread("droidpad-sensors", Process.THREAD_PRIORITY_DISPLAY).apply { start() }
+    Handler(thread.looper)
+}
+
 @Composable
 fun rememberSensorManager(): SensorManager {
     val context = LocalContext.current
@@ -28,8 +40,8 @@ fun rememberSensorManager(): SensorManager {
 }
 
 /**
- * Listens to [sensor] while in composition (and [enabled]). [onSample] runs on the main thread
- * with the raw values and the seconds elapsed since the previous sample, taken from event
+ * Listens to [sensor] while in composition (and [enabled]). [onSample] runs on the main thread,
+ * or on a dedicated sensor thread when [offMainThread] is set, with the raw values and the seconds elapsed since the previous sample, taken from event
  * timestamps so dropped or late frames do not distort integration.
  */
 @Composable
@@ -37,10 +49,11 @@ fun SensorEffect(
     sensorManager: SensorManager,
     sensor: Sensor?,
     enabled: Boolean = true,
+    offMainThread: Boolean = false,
     onSample: (values: FloatArray, dtSec: Float) -> Unit,
 ) {
     val current by rememberUpdatedState(onSample)
-    DisposableEffect(sensorManager, sensor, enabled) {
+    DisposableEffect(sensorManager, sensor, enabled, offMainThread) {
         if (sensor == null || !enabled) return@DisposableEffect onDispose { }
         var lastNs = 0L
         val listener = object : SensorEventListener {
@@ -52,7 +65,7 @@ fun SensorEffect(
 
             override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
         }
-        sensorManager.registerListener(listener, sensor, SAMPLING_PERIOD_US)
+        sensorManager.registerListener(listener, sensor, SAMPLING_PERIOD_US, if (offMainThread) sensorHandler else null)
         onDispose { sensorManager.unregisterListener(listener) }
     }
 }

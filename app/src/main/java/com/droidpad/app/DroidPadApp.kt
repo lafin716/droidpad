@@ -45,6 +45,11 @@ class AppContainer(app: Application) {
             .onEach { sender.moveIntervalMs = it.toLong() }
             .launchIn(appScope)
         settings.settings
+            .map { it.labMoveSmoothingMs }
+            .distinctUntilChanged()
+            .onEach { sender.smoothingMs = it.toLong() }
+            .launchIn(appScope)
+        settings.settings
             .map { it.labQosPreset }
             .distinctUntilChanged()
             .drop(1) // the first value is used by the initial registration
