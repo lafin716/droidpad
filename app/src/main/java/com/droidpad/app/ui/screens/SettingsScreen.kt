@@ -199,7 +199,7 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit, onEditLayout: () -> Un
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HidTransport.entries.forEach { t ->
+                    listOf(HidTransport.BLE, HidTransport.CLASSIC).forEach { t ->
                         FilterChip(
                             selected = s.labTransport == t,
                             onClick = { update { it.copy(labTransport = t) } },

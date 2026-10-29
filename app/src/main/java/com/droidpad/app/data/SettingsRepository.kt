@@ -47,8 +47,8 @@ data class AppSettings(
     val labDeskMouse: Boolean = false,
     /** Labs: Bluetooth QoS declared when registering the HID app. */
     val labQosPreset: HidQosPreset = HidQosPreset.STANDARD,
-    /** Labs: classic Bluetooth HID or HID over GATT (BLE). */
-    val labTransport: HidTransport = HidTransport.CLASSIC,
+    /** HID over GATT (BLE, the default) or classic Bluetooth HID. */
+    val labTransport: HidTransport = HidTransport.BLE,
     /** Labs: minimum gap between pointer movement reports (0 = unpaced). */
     val labMoveIntervalMs: Int = HidReportSender.MOVE_INTERVAL_MS.toInt(),
     /** Labs: delay used to spread pointer motion evenly over reports (0 = off). */
@@ -162,7 +162,8 @@ class SettingsRepository(context: Context) {
         const val K_AIR_HOLD = "air_mouse_hold_to_move"
         const val K_LAB_DESK = "lab_desk_mouse"
         const val K_LAB_QOS = "lab_qos_preset"
-        const val K_LAB_TRANSPORT = "lab_transport"
+        /** Replaces "lab_transport", which stored CLASSIC for anyone who saved settings while BLE was experimental. */
+        const val K_LAB_TRANSPORT = "connection_transport"
         const val K_LAB_MOVE_INTERVAL = "lab_move_interval_ms"
         const val K_LAB_MOVE_SMOOTHING = "lab_move_smoothing_ms"
     }

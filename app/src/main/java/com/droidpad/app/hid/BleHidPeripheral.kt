@@ -29,6 +29,7 @@ import android.os.Looper
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -248,6 +249,7 @@ class BleHidPeripheral(private val context: Context) : ReportTransport {
         override fun onCharacteristicReadRequest(
             device: BluetoothDevice, requestId: Int, offset: Int, characteristic: BluetoothGattCharacteristic,
         ) {
+            claimIfHidPeer(device, characteristic.service)
             val value = when (characteristic) {
                 reportMap -> HidDescriptor.bytes
                 hidInformation -> Hogp.HID_INFORMATION
@@ -266,6 +268,7 @@ class BleHidPeripheral(private val context: Context) : ReportTransport {
         override fun onDescriptorReadRequest(
             device: BluetoothDevice, requestId: Int, offset: Int, descriptor: BluetoothGattDescriptor,
         ) {
+            claimIfHidPeer(device, descriptor.characteristic?.service)
             val value = when (descriptor.uuid) {
                 Hogp.DESC_REPORT_REFERENCE -> reportReferences[descriptor]
                 Hogp.DESC_CCCD -> {
@@ -282,6 +285,7 @@ class BleHidPeripheral(private val context: Context) : ReportTransport {
             device: BluetoothDevice, requestId: Int, characteristic: BluetoothGattCharacteristic,
             preparedWrite: Boolean, responseNeeded: Boolean, offset: Int, value: ByteArray?,
         ) {
+            claimIfHidPeer(device, characteristic.service)
             when (characteristic) {
                 keyboardOutput -> Hogp.ledsFromOutput(value)?.let(::onLeds)
                 protocolModeChar -> value?.firstOrNull()?.let { protocolMode = it }
@@ -333,7 +337,7 @@ class BleHidPeripheral(private val context: Context) : ReportTransport {
     private fun onConnectionState(device: BluetoothDevice, newState: Int) {
         when (newState) {
             BluetoothProfile.STATE_CONNECTED -> {
-                Log.i(TAG, "LE connection from ${device.address} (bond ${device.bondState})")
+                Log.i(TAG, "LE connection from ${device.address} (bond ${device.bondState}, known ${device.address in knownHosts})")
                 // A bonded host keeps its CCCDs across connections and may not write them again.
                 if (host == null && device.address in knownHosts && device.bondState == BluetoothDevice.BOND_BONDED) {
                     subscriptions[device.address] = setOf(HidDescriptor.REPORT_ID_KEYBOARD, HidDescriptor.REPORT_ID_MOUSE)
@@ -360,15 +364,37 @@ class BleHidPeripheral(private val context: Context) : ReportTransport {
         if (!running) return
         if (host?.address == device.address) return
         host = device
-        if (device.bondState == BluetoothDevice.BOND_BONDED && knownHosts.add(device.address)) {
-            prefs.edit { putStringSet(K_HOSTS, knownHosts.toSet()) }
-        }
+        // On first pairing the CCCD write can arrive before bonding finishes; the bond receiver catches that.
+        if (device.bondState == BluetoothDevice.BOND_BONDED) remember(device)
         stopAdvertising()
         // Hold the link from the server side too, so closing the priority client cannot drop it.
         runCatching { server?.connect(device, false) }
         requestHighPriority(device)
         _state.update { it.copy(host = device.toHost(), error = null) }
         setStatus(HidStatus.CONNECTED)
+    }
+
+    private fun remember(device: BluetoothDevice) {
+        if (knownHosts.add(device.address)) {
+            prefs.edit { putStringSet(K_HOSTS, knownHosts.toSet()) }
+            Log.i(TAG, "Remembered host ${device.address}")
+        }
+    }
+
+    /**
+     * A bonded host that reconnects may skip the CCCD writes, but it still reads or writes HID
+     * attributes (report map, protocol mode, LED report). Treat that as the host coming back, so
+     * hosts paired before they were remembered reconnect too. Other LE peers never touch the HID service.
+     */
+    private fun claimIfHidPeer(device: BluetoothDevice, service: BluetoothGattService?) {
+        if (host != null || service?.uuid != Hogp.SERVICE_HID) return
+        if (device.bondState != BluetoothDevice.BOND_BONDED) return
+        main.post {
+            if (host != null) return@post
+            subscriptions.putIfAbsent(device.address, setOf(HidDescriptor.REPORT_ID_KEYBOARD, HidDescriptor.REPORT_ID_MOUSE))
+            Log.i(TAG, "Bonded ${device.address} used the HID service; taking it as host")
+            becomeHost(device)
+        }
     }
 
     /**
@@ -523,6 +549,12 @@ class BleHidPeripheral(private val context: Context) : ReportTransport {
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
+            if (intent.action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+                val device = IntentCompat.getParcelableExtra(intent, BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                val bonded = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR) == BluetoothDevice.BOND_BONDED
+                if (device != null && bonded && device.address == host?.address) remember(device)
+                return
+            }
             if (intent.action != BluetoothAdapter.ACTION_STATE_CHANGED) return
             when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
                 BluetoothAdapter.STATE_ON -> if (running) start()
@@ -538,7 +570,9 @@ class BleHidPeripheral(private val context: Context) : ReportTransport {
         if (receiverRegistered) return
         receiverRegistered = true
         ContextCompat.registerReceiver(
-            context, receiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED,
+            context, receiver,
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED).apply { addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED) },
+            ContextCompat.RECEIVER_NOT_EXPORTED,
         )
     }
 
